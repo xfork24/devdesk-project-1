@@ -4,10 +4,52 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>欢迎来到这里</title>
+  <style>
+    .language-controls {
+      display: flex;
+      justify-content: flex-end;
+      padding: 8px;
+    }
+    #language-toggle {
+      min-height: 44px;
+      padding: 8px 16px;
+      font: inherit;
+      cursor: pointer;
+    }
+    #language-toggle:focus-visible {
+      outline: 3px solid #005fcc;
+      outline-offset: 3px;
+    }
+  </style>
 </head>
 <body>
+  <div class="language-controls">
+    <button id="language-toggle" type="button" lang="en">English</button>
+  </div>
   <main>
     <h1>欢迎来到这里</h1>
+    <p id="welcome-message" lang="zh" aria-live="polite">欢迎</p>
   </main>
+  <script>
+    (() => {
+      const welcome = document.getElementById('welcome-message');
+      const button = document.getElementById('language-toggle');
+      if (!welcome || !button) return;
+
+      let language = 'zh';
+      function renderLanguage(nextLanguage) {
+        language = nextLanguage;
+        welcome.textContent = language === 'zh' ? '欢迎' : 'Welcome';
+        welcome.setAttribute('lang', language);
+        button.textContent = language === 'zh' ? 'English' : '中文';
+        button.setAttribute('lang', language === 'zh' ? 'en' : 'zh');
+      }
+
+      renderLanguage(language);
+      button.addEventListener('click', () => {
+        renderLanguage(language === 'zh' ? 'en' : 'zh');
+      });
+    })();
+  </script>
 </body>
 </html>
