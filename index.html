@@ -29,11 +29,13 @@
   <main>
     <h1>欢迎来到这里</h1>
     <p id="welcome-message" lang="zh" aria-live="polite">欢迎</p>
+    <p id="language-hint" lang="zh">语言切换支持键盘操作</p>
   </main>
   <script>
     (() => {
       const welcome = document.getElementById('welcome-message');
       const button = document.getElementById('language-toggle');
+      const hint = document.getElementById('language-hint');
       if (!welcome || !button) return;
 
       let language = 'zh';
@@ -43,6 +45,10 @@
         welcome.setAttribute('lang', language);
         button.textContent = language === 'zh' ? 'English' : '中文';
         button.setAttribute('lang', language === 'zh' ? 'en' : 'zh');
+        if (hint) {
+          hint.textContent = language === 'zh' ? '语言切换支持键盘操作' : 'Language switching supports keyboard controls';
+          hint.setAttribute('lang', language);
+        }
       }
 
       renderLanguage(language);
