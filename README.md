@@ -4,6 +4,8 @@
 
 独立欢迎文案默认显示“欢迎”。点击右上角的 English 按钮后显示“Welcome”，按钮变为“中文”；再次点击即可切回。按钮支持 Tab 聚焦及 Enter/空格操作。切换即时完成，不请求网络、不刷新页面、不保存语言偏好；重新打开或刷新页面恢复中文。原页面标题与 h1 保留。
 
+欢迎文字下的提示默认显示“语言切换支持键盘操作”，英文状态显示“Language switching supports keyboard controls”，切回或刷新后恢复中文。提示随页面自然换行。
+
 运行测试需要 Node.js ≥22，以及对页面和测试文件的读取权限；无需安装依赖。
 
 在项目根目录执行：
@@ -23,3 +25,9 @@ node --test tests/welcome.test.cjs test/welcome-language.test.cjs
 ```
 
 新增测试执行实际页面脚本，检查初始中文、连续双向切换、重新装载恢复中文和节点缺失时安全退出。它使用最小 DOM 替身，不验证浏览器布局或键盘事件；请在浏览器及窄视口核对按钮位于右上方、焦点可见且不遮挡欢迎内容。
+
+提示正式测试位于 `test/language-hint.test.cjs`，覆盖静态与初始化提示、24 次往返切换及两种语言状态重新装载。运行全部正式及既有测试：
+
+```sh
+node --test tests/welcome.test.cjs test/*.test.cjs
+```

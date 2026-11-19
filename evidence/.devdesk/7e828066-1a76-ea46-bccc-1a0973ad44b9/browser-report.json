@@ -1,0 +1,477 @@
+{
+  "started_at": "2026-11-19T17:27:18.568Z",
+  "base_revision": "c658d0275bd81102dceeb050fd8cb0b0589063f8",
+  "code": {
+    "path": "index.html",
+    "algorithm": "sha256",
+    "digest": "20a98d1a14e130dc3dfd2423d36a3152c5b053121202bf3c5b40831a95fb81f8"
+  },
+  "note": "SHA identifies the exact uncommitted page bytes; final Git revision is assigned by the platform.",
+  "checks": [
+    {
+      "width": 320,
+      "state": "initial-zh",
+      "passed": true,
+      "screenshot": "320-initial-zh.png",
+      "layout": {
+        "rects": [
+          {
+            "id": "language-toggle",
+            "x": 214,
+            "y": 16,
+            "right": 304,
+            "bottom": 60,
+            "width": 90,
+            "height": 44
+          },
+          {
+            "id": "welcome-message",
+            "x": 8,
+            "y": 156.875,
+            "right": 312,
+            "bottom": 180.875,
+            "width": 304,
+            "height": 24
+          },
+          {
+            "id": "language-hint",
+            "x": 8,
+            "y": 196.875,
+            "right": 312,
+            "bottom": 220.875,
+            "width": 304,
+            "height": 24
+          }
+        ],
+        "scrollWidth": 320,
+        "viewport": 320
+      }
+    },
+    {
+      "width": 320,
+      "state": "en-keyboard-enter",
+      "passed": true,
+      "screenshot": "320-en.png",
+      "layout": {
+        "rects": [
+          {
+            "id": "language-toggle",
+            "x": 236,
+            "y": 16,
+            "right": 304,
+            "bottom": 60,
+            "width": 68,
+            "height": 44
+          },
+          {
+            "id": "welcome-message",
+            "x": 8,
+            "y": 156.875,
+            "right": 312,
+            "bottom": 180.875,
+            "width": 304,
+            "height": 24
+          },
+          {
+            "id": "language-hint",
+            "x": 8,
+            "y": 196.875,
+            "right": 312,
+            "bottom": 244.875,
+            "width": 304,
+            "height": 48
+          }
+        ],
+        "scrollWidth": 320,
+        "viewport": 320
+      }
+    },
+    {
+      "width": 320,
+      "state": "reload-from-en",
+      "passed": true,
+      "layout": {
+        "rects": [
+          {
+            "id": "language-toggle",
+            "x": 214,
+            "y": 16,
+            "right": 304,
+            "bottom": 60,
+            "width": 90,
+            "height": 44
+          },
+          {
+            "id": "welcome-message",
+            "x": 8,
+            "y": 156.875,
+            "right": 312,
+            "bottom": 180.875,
+            "width": 304,
+            "height": 24
+          },
+          {
+            "id": "language-hint",
+            "x": 8,
+            "y": 196.875,
+            "right": 312,
+            "bottom": 220.875,
+            "width": 304,
+            "height": 24
+          }
+        ],
+        "scrollWidth": 320,
+        "viewport": 320
+      }
+    },
+    {
+      "width": 320,
+      "state": "en-keyboard-space",
+      "passed": true,
+      "layout": {
+        "rects": [
+          {
+            "id": "language-toggle",
+            "x": 236,
+            "y": 16,
+            "right": 304,
+            "bottom": 60,
+            "width": 68,
+            "height": 44
+          },
+          {
+            "id": "welcome-message",
+            "x": 8,
+            "y": 156.875,
+            "right": 312,
+            "bottom": 180.875,
+            "width": 304,
+            "height": 24
+          },
+          {
+            "id": "language-hint",
+            "x": 8,
+            "y": 196.875,
+            "right": 312,
+            "bottom": 244.875,
+            "width": 304,
+            "height": 48
+          }
+        ],
+        "scrollWidth": 320,
+        "viewport": 320
+      }
+    },
+    {
+      "width": 320,
+      "state": "returned-zh",
+      "passed": true,
+      "screenshot": "320-returned-zh.png",
+      "layout": {
+        "rects": [
+          {
+            "id": "language-toggle",
+            "x": 214,
+            "y": 16,
+            "right": 304,
+            "bottom": 60,
+            "width": 90,
+            "height": 44
+          },
+          {
+            "id": "welcome-message",
+            "x": 8,
+            "y": 156.875,
+            "right": 312,
+            "bottom": 180.875,
+            "width": 304,
+            "height": 24
+          },
+          {
+            "id": "language-hint",
+            "x": 8,
+            "y": 196.875,
+            "right": 312,
+            "bottom": 220.875,
+            "width": 304,
+            "height": 24
+          }
+        ],
+        "scrollWidth": 320,
+        "viewport": 320
+      }
+    },
+    {
+      "width": 320,
+      "state": "reload-from-returned-zh",
+      "passed": true,
+      "layout": {
+        "rects": [
+          {
+            "id": "language-toggle",
+            "x": 214,
+            "y": 16,
+            "right": 304,
+            "bottom": 60,
+            "width": 90,
+            "height": 44
+          },
+          {
+            "id": "welcome-message",
+            "x": 8,
+            "y": 156.875,
+            "right": 312,
+            "bottom": 180.875,
+            "width": 304,
+            "height": 24
+          },
+          {
+            "id": "language-hint",
+            "x": 8,
+            "y": 196.875,
+            "right": 312,
+            "bottom": 220.875,
+            "width": 304,
+            "height": 24
+          }
+        ],
+        "scrollWidth": 320,
+        "viewport": 320
+      }
+    },
+    {
+      "width": 1280,
+      "state": "initial-zh",
+      "passed": true,
+      "screenshot": "1280-initial-zh.png",
+      "layout": {
+        "rects": [
+          {
+            "id": "language-toggle",
+            "x": 1174,
+            "y": 16,
+            "right": 1264,
+            "bottom": 60,
+            "width": 90,
+            "height": 44
+          },
+          {
+            "id": "welcome-message",
+            "x": 8,
+            "y": 156.875,
+            "right": 1272,
+            "bottom": 180.875,
+            "width": 1264,
+            "height": 24
+          },
+          {
+            "id": "language-hint",
+            "x": 8,
+            "y": 196.875,
+            "right": 1272,
+            "bottom": 220.875,
+            "width": 1264,
+            "height": 24
+          }
+        ],
+        "scrollWidth": 1280,
+        "viewport": 1280
+      }
+    },
+    {
+      "width": 1280,
+      "state": "en-keyboard-enter",
+      "passed": true,
+      "screenshot": "1280-en.png",
+      "layout": {
+        "rects": [
+          {
+            "id": "language-toggle",
+            "x": 1196,
+            "y": 16,
+            "right": 1264,
+            "bottom": 60,
+            "width": 68,
+            "height": 44
+          },
+          {
+            "id": "welcome-message",
+            "x": 8,
+            "y": 156.875,
+            "right": 1272,
+            "bottom": 180.875,
+            "width": 1264,
+            "height": 24
+          },
+          {
+            "id": "language-hint",
+            "x": 8,
+            "y": 196.875,
+            "right": 1272,
+            "bottom": 220.875,
+            "width": 1264,
+            "height": 24
+          }
+        ],
+        "scrollWidth": 1280,
+        "viewport": 1280
+      }
+    },
+    {
+      "width": 1280,
+      "state": "reload-from-en",
+      "passed": true,
+      "layout": {
+        "rects": [
+          {
+            "id": "language-toggle",
+            "x": 1174,
+            "y": 16,
+            "right": 1264,
+            "bottom": 60,
+            "width": 90,
+            "height": 44
+          },
+          {
+            "id": "welcome-message",
+            "x": 8,
+            "y": 156.875,
+            "right": 1272,
+            "bottom": 180.875,
+            "width": 1264,
+            "height": 24
+          },
+          {
+            "id": "language-hint",
+            "x": 8,
+            "y": 196.875,
+            "right": 1272,
+            "bottom": 220.875,
+            "width": 1264,
+            "height": 24
+          }
+        ],
+        "scrollWidth": 1280,
+        "viewport": 1280
+      }
+    },
+    {
+      "width": 1280,
+      "state": "en-keyboard-space",
+      "passed": true,
+      "layout": {
+        "rects": [
+          {
+            "id": "language-toggle",
+            "x": 1196,
+            "y": 16,
+            "right": 1264,
+            "bottom": 60,
+            "width": 68,
+            "height": 44
+          },
+          {
+            "id": "welcome-message",
+            "x": 8,
+            "y": 156.875,
+            "right": 1272,
+            "bottom": 180.875,
+            "width": 1264,
+            "height": 24
+          },
+          {
+            "id": "language-hint",
+            "x": 8,
+            "y": 196.875,
+            "right": 1272,
+            "bottom": 220.875,
+            "width": 1264,
+            "height": 24
+          }
+        ],
+        "scrollWidth": 1280,
+        "viewport": 1280
+      }
+    },
+    {
+      "width": 1280,
+      "state": "returned-zh",
+      "passed": true,
+      "screenshot": "1280-returned-zh.png",
+      "layout": {
+        "rects": [
+          {
+            "id": "language-toggle",
+            "x": 1174,
+            "y": 16,
+            "right": 1264,
+            "bottom": 60,
+            "width": 90,
+            "height": 44
+          },
+          {
+            "id": "welcome-message",
+            "x": 8,
+            "y": 156.875,
+            "right": 1272,
+            "bottom": 180.875,
+            "width": 1264,
+            "height": 24
+          },
+          {
+            "id": "language-hint",
+            "x": 8,
+            "y": 196.875,
+            "right": 1272,
+            "bottom": 220.875,
+            "width": 1264,
+            "height": 24
+          }
+        ],
+        "scrollWidth": 1280,
+        "viewport": 1280
+      }
+    },
+    {
+      "width": 1280,
+      "state": "reload-from-returned-zh",
+      "passed": true,
+      "layout": {
+        "rects": [
+          {
+            "id": "language-toggle",
+            "x": 1174,
+            "y": 16,
+            "right": 1264,
+            "bottom": 60,
+            "width": 90,
+            "height": 44
+          },
+          {
+            "id": "welcome-message",
+            "x": 8,
+            "y": 156.875,
+            "right": 1272,
+            "bottom": 180.875,
+            "width": 1264,
+            "height": 24
+          },
+          {
+            "id": "language-hint",
+            "x": 8,
+            "y": 196.875,
+            "right": 1272,
+            "bottom": 220.875,
+            "width": 1264,
+            "height": 24
+          }
+        ],
+        "scrollWidth": 1280,
+        "viewport": 1280
+      }
+    }
+  ],
+  "browser": "145.0.7632.0",
+  "status": "passed",
+  "finished_at": "2026-11-19T17:27:20.263Z"
+}
