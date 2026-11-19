@@ -3,6 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const os = require('node:os');
 const { spawnSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '../../..');
@@ -17,9 +18,12 @@ function read(relative) {
 }
 
 function run(file, cwd) {
+  const env = { ...process.env };
+  delete env.NODE_TEST_CONTEXT;
+  delete env.NODE_OPTIONS;
   const result = spawnSync(process.execPath, ['--test', '--test-reporter=tap', file], {
     cwd, encoding: 'utf8', timeout: 8000,
-    env: { ...process.env, NODE_OPTIONS: '', NODE_TEST_CONTEXT: '' },
+    env,
   });
   assert.ifError(result.error);
   assert.equal(result.signal, null, '测试不得超时或被信号终止');
@@ -44,7 +48,7 @@ function green(result) {
 function isolated(action) {
   const html = read('index.html');
   const source = read('tests/welcome.test.cjs');
-  const dir = fs.mkdtempSync(path.join(__dirname, 'scenario-'));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'welcome-2a8fe6ff-6e36-0c9f-77b9-453e26bfc88f-'));
   try {
     fs.mkdirSync(path.join(dir, 'tests'));
     const page = path.join(dir, 'index.html');
