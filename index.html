@@ -147,6 +147,7 @@
         };
         pending.onerror = () => {
           if (token !== request) return;
+          setExpanded(false);
           image.hidden = true;
           status.textContent = `第 ${index + 1} / 5 张加载失败，请切换图片后重试。`;
         };
