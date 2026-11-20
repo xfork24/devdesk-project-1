@@ -53,6 +53,12 @@ async function worker() {
           before = await layout();
           baselineShot = await page.screenshot({path: path.join(output, `baseline-${width}.png`), fullPage: true});
         }
+        const staticContext = await browser.newContext({javaScriptEnabled: false, viewport: {width, height: 720}});
+        try {
+          const staticPage = await staticContext.newPage();
+          await staticPage.goto(sourceIdentity.url, {timeout: 10000});
+          assert.equal(await staticPage.locator('#language-toggle').getAttribute('title', {timeout: 5000}), '切换为英文');
+        } finally { await bounded(staticContext.close(), 3000); }
         await load(sourceIdentity.url);
         const updatedShot = await page.screenshot({path: path.join(output, `updated-${width}.png`), fullPage: true});
         if (baselineIdentity) {
@@ -61,6 +67,7 @@ async function worker() {
         }
         const remember = () => page.evaluate(() => { window.originalHint = document.getElementById('language-hint'); });
         const check = async english => {
+          assert.equal(await page.locator('#language-toggle').getAttribute('title'), english ? 'Switch to Chinese' : '切换为英文');
           assert.equal(await page.locator('#language-toggle').getAttribute('aria-describedby'), 'language-hint');
           assert.equal(await page.locator('*').evaluateAll(ns => ns.filter(n => n.id === 'language-hint').length), 1);
           assert.equal(await page.evaluate(() => window.originalHint === document.getElementById('language-hint')), true);
@@ -80,9 +87,13 @@ async function worker() {
         await page.keyboard.press('Enter'); await check(true);
         await page.keyboard.press('Space'); await check(false);
         for (let i = 1; i <= 24; i++) { await page.locator('#language-toggle').click(); await check(i % 2 === 1); }
+        for (let round = 0; round < 24; round++) {
+          await page.locator('#language-toggle').click(); await check(true);
+          await page.locator('#language-toggle').click(); await check(false);
+        }
         await page.reload(); await remember(); await check(false);
         records.push({width, height: 720, mouse: true, tab: true, enter: true, space: true,
-          repeatedToggles: 24, refreshFromEnglish: true, refreshFromChinese: true,
+          staticTitle: true, title: true, roundTrips: 24, repeatedToggles: 24, refreshFromEnglish: true, refreshFromChinese: true,
           association: true, uniqueHint: true, reusedHint: true,
           baselineComparison: baselineIdentity ? 'passed' : 'not_requested'});
       } finally { await bounded(page.close(), 3000); }
