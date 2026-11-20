@@ -57,7 +57,7 @@ async function worker() {
         try {
           const staticPage = await staticContext.newPage();
           await staticPage.goto(sourceIdentity.url, {timeout: 10000});
-          assert.equal(await staticPage.locator('#language-toggle').getAttribute('title', {timeout: 5000}), '切换为英文');
+          assert.equal(await staticPage.locator('#language-toggle').getAttribute('title', {timeout: 5000}), '切换为英语');
         } finally { await bounded(staticContext.close(), 3000); }
         await load(sourceIdentity.url);
         const updatedShot = await page.screenshot({path: path.join(output, `updated-${width}.png`), fullPage: true});
@@ -67,7 +67,7 @@ async function worker() {
         }
         const remember = () => page.evaluate(() => { window.originalHint = document.getElementById('language-hint'); });
         const check = async english => {
-          assert.equal(await page.locator('#language-toggle').getAttribute('title'), english ? 'Switch to Chinese' : '切换为英文');
+          assert.equal(await page.locator('#language-toggle').getAttribute('title'), english ? 'Switch to Simplified Chinese' : '切换为英语');
           assert.equal(await page.locator('#language-toggle').getAttribute('aria-describedby'), 'language-hint');
           assert.equal(await page.locator('*').evaluateAll(ns => ns.filter(n => n.id === 'language-hint').length), 1);
           assert.equal(await page.evaluate(() => window.originalHint === document.getElementById('language-hint')), true);

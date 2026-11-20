@@ -24,7 +24,7 @@ function open(execute = true) {
 function check(nodes, english) {
   const button = nodes.get('language-toggle');
   assert.ok(button, '语言按钮必须存在');
-  assert.equal(button.attrs.title, english ? 'Switch to Chinese' : '切换为英文');
+  assert.equal(button.attrs.title, english ? 'Switch to Simplified Chinese' : '切换为英语');
   assert.equal(button.attrs['aria-describedby'], 'language-hint', '按钮必须精确关联语言提示');
   const hint = nodes.get('language-hint');
   assert.ok(hint, '语言提示目标必须存在');

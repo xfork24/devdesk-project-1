@@ -4,7 +4,7 @@
 
 独立欢迎文案默认显示“欢迎”。点击右上角的 English 按钮后显示“Welcome”，按钮变为“中文”；再次点击即可切回。按钮支持 Tab 聚焦及 Enter/空格操作。切换即时完成，不请求网络、不刷新页面、不保存语言偏好；重新打开或刷新页面恢复中文。原页面标题与 h1 保留。
 
-欢迎文字下的提示默认显示“语言切换支持键盘操作”，英文状态显示“Language switching supports keyboard controls”，切回或刷新后恢复中文。提示随页面自然换行。按钮 title 在中文状态精确为“切换为英文”，英文状态精确为“Switch to Chinese”，静态页面及刷新均从中文目标提示开始。
+欢迎文字下的提示默认显示“语言切换支持键盘操作”，英文状态显示“Language switching supports keyboard controls”，切回或刷新后恢复中文。提示随页面自然换行。按钮 title 在中文状态精确为“切换为英语”，英文状态精确为“Switch to Simplified Chinese”，静态页面及刷新均从中文目标提示开始。
 
 运行测试需要 Node.js ≥22，以及对页面和测试文件的读取权限；无需安装依赖。
 
@@ -80,3 +80,5 @@ Node v24.13.0、Playwright 1.58.2、Chromium 145.0.7632.0；本轮外层冻结�
 原生操作 `exec-83e3139b-8040-4701-b5d7-cd38ed4d7740`，开始/完成 Unix ms 为 1795134028244 / 1795134053401，exit=0、completed，无超时或取消；stdout 记录两个视口全部检查通过、布局及截图一致，stderr 无失败输出。最终四张截图共 54958 字节，见 [结果](evidence/.devdesk/19fe7521-2a56-3b7a-1f7a-482b09b3e3d1/maintained-final/result.json)。[原始观测](evidence/.devdesk/19fe7521-2a56-3b7a-1f7a-482b09b3e3d1/maintained-final/command-observation.json) 原样复制自 `/run/devdesk/command-output/f9e602dca6913a5debde7c5feb2e0e35ca7851a08a268c7d53e3478b1ad3f9c9.json`，已核对字节一致，SHA-256 为 `07b0f2f9195afa4d311ce9e52ca3e5d19b1359b24c3092b380fc26df808f3f22`；保留实际 thread、turn、命令、时间、退出码。
 
 同目录的 `maintained-browser/` 保留本轮较早入口版本通过的结果及原始观测。`maintained-timeout/` 保留最终入口 2500ms 总超时的 exit=1 观察（操作 `exec-e7ea2264-b2ef-4779-82fa-38729c63a07b`）；`maintained-failure/` 保留不存在浏览器的 exit=1 环境失败观察（操作 `exec-01d36dde-23c4-4213-ae3d-96cbd54818b6`）。两者均正常结束监督进程并经过清理路径，不是业务 Red 或验收通过；本轮新增证据约 131 KB。语法检查通过。没有运行或宣称通过平台 Green、三文件源/候选回归、独立评审、Human 或 Git 门禁；这些仍由原工作流负责。
+
+本次目标语言 title 更新的真实浏览器结果见 `evidence/.devdesk/7f8b0ebe-1ef7-3104-f480-5c95cbfe3c48/title-verified/result.json`，原始命令观测同目录保存。使用修改前真实页面副本比较，320/1280 两种宽度布局及截图一致；鼠标、键盘、24组往返和两种状态刷新通过。以上旧轮次记录仍属历史。
