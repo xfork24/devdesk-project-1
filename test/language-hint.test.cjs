@@ -5,19 +5,31 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
-function open() {
+function open(execute = true) {
   const nodes = new Map();
-  for (const m of html.matchAll(/<(p|button)\b([^>]*)>([^<]*)<\/\1>/g)) {
+  const allNodes = [];
+  for (const m of html.matchAll(/<([a-z][\w:-]*)\b([^>]*)>/gi)) {
     const attrs = Object.fromEntries([...m[2].matchAll(/([\w-]+)="([^"]*)"/g)].map(a => [a[1], a[2]]));
-    if (attrs.id) nodes.set(attrs.id, {textContent: m[3], attrs, listeners: [],
+    const node = {textContent: html.slice(m.index + m[0].length).split('<')[0], attrs, listeners: [],
       setAttribute(k, v) { this.attrs[k] = v; },
-      addEventListener(type, fn) { this.listeners.push({type, fn}); }});
+      addEventListener(type, fn) { this.listeners.push({type, fn}); }};
+    allNodes.push(node);
+    if (attrs.id && !nodes.has(attrs.id)) nodes.set(attrs.id, node);
   }
+  nodes.allNodes = allNodes;
   const context = vm.createContext({document: {getElementById: id => nodes.get(id)}});
-  for (const s of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) vm.runInContext(s[1], context);
+  if (execute) for (const s of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) vm.runInContext(s[1], context);
   return nodes;
 }
 function check(nodes, english) {
+  const button = nodes.get('language-toggle');
+  assert.ok(button, '语言按钮必须存在');
+  assert.equal(button.attrs['aria-describedby'], 'language-hint', '按钮必须精确关联语言提示');
+  const hint = nodes.get('language-hint');
+  assert.ok(hint, '语言提示目标必须存在');
+  assert.equal(nodes.allNodes.filter(node => node.attrs.id === 'language-hint').length, 1,
+    '全部元素中的语言提示 ID 必须唯一');
+  assert.strictEqual(nodes.get(button.attrs['aria-describedby']), hint, '关联必须指向现有提示');
   for (const [id, text, lang] of [
     ['language-hint', english ? 'Language switching supports keyboard controls' : '语言切换支持键盘操作', english ? 'en' : 'zh'],
     ['welcome-message', english ? 'Welcome' : '欢迎', english ? 'en' : 'zh'],
@@ -55,4 +67,7 @@ test('英文与切回中文后全新装载均恢复默认中文', () => {
     check(reloaded, false);
     assert.notStrictEqual(reloaded.get('language-hint'), nodes.get('language-hint'));
   }
+});
+test('脚本执行前静态关联有效且默认中文', () => {
+  check(open(false), false);
 });
