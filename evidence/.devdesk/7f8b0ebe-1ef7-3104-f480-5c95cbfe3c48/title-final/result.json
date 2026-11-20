@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "status": "failed",
+  "startedAt": "2026-11-20T04:23:19.454Z",
+  "finishedAt": "2026-11-20T04:23:19.597Z",
+  "timedOut": false,
+  "signal": null,
+  "error": "Error: Error: Cannot find module '/tmp/devdesk-runtime/node/node_modules/playwright'\nRequire stack:\n- /work/test/browser-acceptance.cjs\n    at Module._resolveFilename (node:internal/modules/cjs/loader:1421:15)\n    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)\n    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)\n    at Module._load (node:internal/modules/cjs/loader:1227:37)\n    at TracingChannel.traceSync (node:diagnostics_channel:328:14)\n    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)\n    at Module.require (node:internal/modules/cjs/loader:1504:12)\n    at require (node:internal/modules/helpers:152:16)\n    at worker (/work/test/browser-acceptance.cjs:23:24)\n    at Object.<anonymous> (/work/test/browser-acceptance.cjs:155:3)\n    at supervise (/work/test/browser-acceptance.cjs:139:65)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+}
