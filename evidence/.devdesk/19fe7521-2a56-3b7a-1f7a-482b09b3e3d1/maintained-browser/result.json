@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "startedAt": "2026-11-20T00:19:05.777Z",
+  "finishedAt": "2026-11-20T00:19:23.961Z",
+  "timedOut": false,
+  "signal": null,
+  "source": {
+    "path": "/work/index.html",
+    "url": "file:///work/index.html",
+    "sha256": "352e34fcd4a5193f44327d085461ae8c49c539bfccf7886f010d63b6d47bf525"
+  },
+  "baseline": {
+    "path": "/tmp/devdesk-runtime/baseline-language.html",
+    "url": "file:///tmp/devdesk-runtime/baseline-language.html",
+    "sha256": "20a98d1a14e130dc3dfd2423d36a3152c5b053121202bf3c5b40831a95fb81f8"
+  },
+  "browser": "145.0.7632.0",
+  "playwright": "1.58.2",
+  "entrySha256": "01d3dc2eac834279b9fd38ee63314b08b5e46ca76815b72e23d12e19bd3aa9c3",
+  "node": "v24.13.0",
+  "records": [
+    {
+      "width": 320,
+      "height": 720,
+      "mouse": true,
+      "tab": true,
+      "enter": true,
+      "space": true,
+      "repeatedToggles": 24,
+      "refreshFromEnglish": true,
+      "refreshFromChinese": true,
+      "association": true,
+      "uniqueHint": true,
+      "reusedHint": true,
+      "baselineComparison": "passed"
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "mouse": true,
+      "tab": true,
+      "enter": true,
+      "space": true,
+      "repeatedToggles": 24,
+      "refreshFromEnglish": true,
+      "refreshFromChinese": true,
+      "association": true,
+      "uniqueHint": true,
+      "reusedHint": true,
+      "baselineComparison": "passed"
+    }
+  ],
+  "error": null
+}
