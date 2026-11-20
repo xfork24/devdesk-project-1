@@ -83,3 +83,6 @@ test('目标 title 随24组完整往返更新并复用节点', () => {
     for (const [id, node] of original) assert.strictEqual(nodes.get(id), node);
   }
 });
+
+// Keep gallery behavior in the frozen three-file regression entry point.
+require('./gallery.test.cjs');
