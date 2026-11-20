@@ -4,7 +4,7 @@
 
 独立欢迎文案默认显示“欢迎”。点击右上角的 English 按钮后显示“Welcome”，按钮变为“中文”；再次点击即可切回。按钮支持 Tab 聚焦及 Enter/空格操作。切换即时完成，不请求网络、不刷新页面、不保存语言偏好；重新打开或刷新页面恢复中文。原页面标题与 h1 保留。
 
-欢迎文字下的提示默认显示“语言切换支持键盘操作”，英文状态显示“Language switching supports keyboard controls”，切回或刷新后恢复中文。提示随页面自然换行。
+欢迎文字下的提示默认显示“语言切换支持键盘操作”，英文状态显示“Language switching supports keyboard controls”，切回或刷新后恢复中文。提示随页面自然换行。按钮 title 在中文状态精确为“切换为英文”，英文状态精确为“Switch to Chinese”，静态页面及刷新均从中文目标提示开始。
 
 运行测试需要 Node.js ≥22，以及对页面和测试文件的读取权限；无需安装依赖。
 
@@ -26,7 +26,7 @@ node --test tests/welcome.test.cjs test/welcome-language.test.cjs
 
 新增测试执行实际页面脚本，检查初始中文、连续双向切换、重新装载恢复中文和节点缺失时安全退出。它使用最小 DOM 替身，不验证浏览器布局或键盘事件；请在浏览器及窄视口核对按钮位于右上方、焦点可见且不遮挡欢迎内容。
 
-提示正式测试位于 `test/language-hint.test.cjs`，覆盖静态与初始化提示、24 次往返切换及两种语言状态重新装载。运行全部正式及既有测试：
+提示正式测试位于 `test/language-hint.test.cjs`，覆盖静态与初始化提示及 title、原有24次逐次切换、24组完整往返及两种语言状态重新装载。运行全部正式及既有测试：
 
 ```sh
 node --test tests/welcome.test.cjs test/*.test.cjs
@@ -57,7 +57,7 @@ node test/browser-acceptance.cjs /absolute/path/to/original.html
 | `BROWSER_OUTPUT` | 截图及 `result.json` 目录；默认 `$DEVDESK_RUNTIME_DIR/browser-acceptance`，可选新的小体积验收证据目录 |
 | `BROWSER_TIMEOUT_MS` | 总运行时限，默认 90000ms，允许 100～300000ms；清理额外约 100ms |
 
-入口在 320×720、1280×720 下检查鼠标、Tab 聚焦、Enter、Space、24 次逐次切换、英文/中文状态刷新，逐次断言三处文案及 lang、精确 ARIA 关联、全部元素中的提示 ID 唯一和节点复用。可选基线比较元素边界、字体和初始截图字节；未提供基线时结果明确为 `not_requested`。每个视口输出 `updated-*.png`，指定基线时另有 `baseline-*.png`。请为每次需保留的执行选择不同输出目录。
+入口在 320×720、1280×720 下检查鼠标、Tab 聚焦、Enter、Space、原有24次逐次切换、24组完整往返、静态及动态 title、英文/中文状态刷新，逐次断言三处文案及 lang、精确 ARIA 关联、全部元素中的提示 ID 唯一和节点复用。可选基线比较元素边界、字体和初始截图字节；未提供基线时结果明确为 `not_requested`。每个视口输出 `updated-*.png`，指定基线时另有 `baseline-*.png`。请为每次需保留的执行选择不同输出目录。
 
 stdout 最后一行为 JSON，`result.json` 保存同一结果：`status`、起止时间、`timedOut`、`signal`、`error`；成功时还有源码/基线路径、file URL、SHA-256、入口摘要、Node/Playwright/浏览器版本及各视口 `records`。通过退出 0；断言、环境、超时、关闭失败退出非 0。启动配置错误可能只向 stderr 输出失败 JSON。原始命令观测由执行平台另行保存，结果文件不替代它，也不替代独立 Red/Green 或三文件平台回归。
 
