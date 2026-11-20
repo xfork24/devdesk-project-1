@@ -24,7 +24,7 @@
 </head>
 <body>
   <div class="language-controls">
-    <button id="language-toggle" type="button" title="切换为英语" lang="en" aria-describedby="language-hint">English</button>
+    <button id="language-toggle" type="button" title="切换到英文" lang="en" aria-describedby="language-hint">English</button>
   </div>
   <main>
     <h1>欢迎来到这里</h1>
@@ -41,7 +41,7 @@
       let language = 'zh';
       function renderLanguage(nextLanguage) {
         language = nextLanguage;
-        button.setAttribute('title', language === 'zh' ? '切换为英语' : 'Switch to Simplified Chinese');
+        button.setAttribute('title', language === 'zh' ? '切换到英文' : 'Switch to Chinese (Simplified)');
         welcome.textContent = language === 'zh' ? '欢迎' : 'Welcome';
         welcome.setAttribute('lang', language);
         button.textContent = language === 'zh' ? 'English' : '中文';

@@ -4,7 +4,7 @@
 
 独立欢迎文案默认显示“欢迎”。点击右上角的 English 按钮后显示“Welcome”，按钮变为“中文”；再次点击即可切回。按钮支持 Tab 聚焦及 Enter/空格操作。切换即时完成，不请求网络、不刷新页面、不保存语言偏好；重新打开或刷新页面恢复中文。原页面标题与 h1 保留。
 
-欢迎文字下的提示默认显示“语言切换支持键盘操作”，英文状态显示“Language switching supports keyboard controls”，切回或刷新后恢复中文。提示随页面自然换行。按钮 title 在中文状态精确为“切换为英语”，英文状态精确为“Switch to Simplified Chinese”，静态页面及刷新均从中文目标提示开始。
+欢迎文字下的提示默认显示“语言切换支持键盘操作”，英文状态显示“Language switching supports keyboard controls”，切回或刷新后恢复中文。提示随页面自然换行。按钮 title 在中文状态精确为“切换到英文”，英文状态精确为“Switch to Chinese (Simplified)”，静态页面及刷新均从中文目标提示开始。
 
 运行测试需要 Node.js ≥22，以及对页面和测试文件的读取权限；无需安装依赖。
 
