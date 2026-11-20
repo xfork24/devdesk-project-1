@@ -54,6 +54,16 @@ async function worker() {
           .evaluateAll(nodes => nodes.map(n => ({tag: n.tagName, rect: n.getBoundingClientRect().toJSON(), font: getComputedStyle(n).font})));
         // Deterministic image fixtures test contain with landscape and portrait ratios.
         // Production CDN availability is a separate network observation.
+        await page.addInitScript(() => {
+          const NativeImage = window.Image;
+          window.galleryRequests = [];
+          window.Image = function (...args) {
+            if (!window.controlGalleryRequests) return new NativeImage(...args);
+            const request = {};
+            window.galleryRequests.push(request);
+            return request;
+          };
+        });
         let failImages = false;
         const imageRequests = [];
         await page.route('https://images.pexels.com/**', async route => {
@@ -164,10 +174,43 @@ async function worker() {
         failImages = false;
         await page.locator('#gallery-next').click(); await ready();
         assert.equal((await status.textContent()).includes('失败'), false);
+        // Control preloader callbacks while keeping the real DOM, CSS and image element.
+        await page.evaluate(() => { window.controlGalleryRequests = true; document.body.style.overflow = 'auto'; });
+        await page.locator('#gallery-next').click();
+        await page.locator('#gallery-prev').focus();
+        await page.evaluate(() => window.scrollTo(0, 80));
+        const savedScroll = await page.evaluate(() => window.scrollY);
+        const savedRect = await trigger.boundingBox();
+        await trigger.evaluate(n => n.click());
+        assert.deepEqual(await trigger.boundingBox(), {x: 0, y: 0, width, height: 720});
+        assert.equal(await page.evaluate(() => document.body.style.overflow), 'hidden');
+        await page.evaluate(() => window.galleryRequests[0].onerror());
+        assert.equal(await trigger.getAttribute('aria-expanded'), 'false');
+        assert.equal(await page.evaluate(() => document.body.style.overflow), 'auto');
+        assert.equal(await page.evaluate(() => window.scrollY), savedScroll);
+        assert.deepEqual(await trigger.boundingBox(), savedRect);
+        assert.equal(await page.locator('#gallery-prev').evaluate(n => n === document.activeElement), true);
+        assert.equal(await page.locator('.gallery-controls').evaluate(n => getComputedStyle(n).visibility), 'visible');
+        assert.equal(await image.isVisible(), false);
+        assert.match(await status.textContent(), /失败/);
+        await page.locator('#gallery-next').click();
+        await page.locator('#gallery-next').click();
+        await trigger.evaluate(n => n.click());
+        const loadingStatus = await status.textContent();
+        await page.evaluate(() => { window.galleryRequests[1].onerror(); window.galleryRequests[1].onload(); });
+        assert.equal(await trigger.getAttribute('aria-expanded'), 'true');
+        assert.equal(await status.textContent(), loadingStatus);
+        assert.equal(await image.isVisible(), false);
+        await page.evaluate(() => window.galleryRequests[2].onload());
+        assert.equal(await image.isVisible(), true);
+        assert.equal(await trigger.getAttribute('aria-expanded'), 'true');
+        await trigger.click();
+        await page.evaluate(() => { window.controlGalleryRequests = false; });
+        await page.locator('#gallery-next').click(); await ready();
         await page.screenshot({path: path.join(output, `gallery-${width}.png`), fullPage: true});
         records.push({imageMode: imageDirectory ? 'cached Pexels JPEGs' : 'controlled SVG fixtures; CDN not verified', width, height: 720, mouse: true, tab: true, enter: true, space: true,
           staticTitle: true, title: true, roundTrips: 24, repeatedToggles: 24, refreshFromEnglish: true, refreshFromChinese: true,
-          association: true, uniqueHint: true, reusedHint: true, gallery: {photos: 5, cycles: true, repeatedRestore: true, ratio: true, failureRecovery: true, rapidSwitch: true, keyboard: true, imageRequests},
+          association: true, uniqueHint: true, reusedHint: true, gallery: {photos: 5, cycles: true, repeatedRestore: true, ratio: true, failureRecovery: true, expandedFailureRecovery: true, staleExpandedCallbacks: true, rapidSwitch: true, keyboard: true, imageRequests},
           baselineComparison: baselineIdentity ? 'passed' : 'not_requested'});
       } finally { await bounded(page.close(), 3000); }
     }

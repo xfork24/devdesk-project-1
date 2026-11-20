@@ -50,3 +50,34 @@ test('图片窗：五图固定顺序、双向循环、每图重复还原和请�
 test('图片窗：必要节点缺失安全退出', () => {
   for (const id of ['gallery','gallery-image','gallery-prev','gallery-next','gallery-status','gallery-trigger']) assert.equal(open(id).pending.length, 0);
 });
+
+test('加载中展开后当前失败恢复原状态，过期事件不能关闭新展开', () => {
+  const p = open(), trigger = p.get('gallery-trigger'), prev = p.get('gallery-prev');
+  p.document.body.style.overflow = 'auto';
+  prev.focus();
+  trigger.click();
+  assert.equal(trigger.attrs['aria-expanded'], 'true');
+  p.window.scrollY = 0;
+  p.pending[0].onerror();
+  assert.equal(trigger.attrs['aria-expanded'], 'false');
+  assert.equal(p.document.body.style.overflow, 'auto');
+  assert.equal(p.window.scrollY, 123);
+  assert.equal(p.document.activeElement, prev);
+  assert.equal(p.get('gallery-image').hidden, true);
+  assert.match(p.get('gallery-status').textContent, /失败/);
+  p.get('gallery-next').click();
+  const stale = p.pending.at(-1);
+  p.get('gallery-next').click();
+  trigger.click();
+  const status = p.get('gallery-status').textContent;
+  stale.onerror(); stale.onload();
+  assert.equal(trigger.attrs['aria-expanded'], 'true');
+  assert.equal(p.get('gallery-status').textContent, status);
+  assert.equal(p.get('gallery-image').hidden, true);
+  p.pending.at(-1).onload();
+  assert.equal(p.get('gallery-image').hidden, false);
+  trigger.click();
+  p.get('gallery-next').click();
+  p.pending.at(-1).onload();
+  assert.equal(p.get('gallery-image').hidden, false);
+});
