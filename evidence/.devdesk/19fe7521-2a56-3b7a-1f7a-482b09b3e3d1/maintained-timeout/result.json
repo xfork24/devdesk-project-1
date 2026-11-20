@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "status": "failed",
+  "startedAt": "2026-11-20T00:20:13.874Z",
+  "finishedAt": "2026-11-20T00:20:16.505Z",
+  "timedOut": true,
+  "signal": null,
+  "error": "Error: worker terminated: {\"code\":null,\"signal\":\"SIGKILL\"}\n    at supervise (/work/test/browser-acceptance.cjs:128:65)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+}
