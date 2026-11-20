@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "startedAt": "2026-11-20T04:23:58.196Z",
+  "finishedAt": "2026-11-20T04:24:22.925Z",
+  "timedOut": false,
+  "signal": null,
+  "source": {
+    "path": "/work/index.html",
+    "url": "file:///work/index.html",
+    "sha256": "ffdfe50889c5c047c93b4573c432d5abc07b03243ae350b92b85947818a3aa75"
+  },
+  "baseline": {
+    "path": "/tmp/devdesk-runtime/title-baseline.html",
+    "url": "file:///tmp/devdesk-runtime/title-baseline.html",
+    "sha256": "ef9e0690839d3fdca143c0e90de1710c514ac78d7766a8f12e0a1a6dc9a70e5f"
+  },
+  "browser": "145.0.7632.0",
+  "playwright": "1.58.2",
+  "entrySha256": "82504adbe03eb89650195e3ead2d467ca1b2ec9a3e60cc6bf5143aab34801553",
+  "node": "v24.13.0",
+  "records": [
+    {
+      "width": 320,
+      "height": 720,
+      "mouse": true,
+      "tab": true,
+      "enter": true,
+      "space": true,
+      "staticTitle": true,
+      "title": true,
+      "roundTrips": 24,
+      "repeatedToggles": 24,
+      "refreshFromEnglish": true,
+      "refreshFromChinese": true,
+      "association": true,
+      "uniqueHint": true,
+      "reusedHint": true,
+      "baselineComparison": "passed"
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "mouse": true,
+      "tab": true,
+      "enter": true,
+      "space": true,
+      "staticTitle": true,
+      "title": true,
+      "roundTrips": 24,
+      "repeatedToggles": 24,
+      "refreshFromEnglish": true,
+      "refreshFromChinese": true,
+      "association": true,
+      "uniqueHint": true,
+      "reusedHint": true,
+      "baselineComparison": "passed"
+    }
+  ],
+  "error": null
+}
