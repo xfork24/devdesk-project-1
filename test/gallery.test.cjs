@@ -14,7 +14,7 @@ function open(missing) {
       classList: {toggle(c, value) { value ? classes.add(c) : classes.delete(c); }},
       addEventListener(k,v) { listeners[k] = v; },
       focus() { document.activeElement = this; },
-      closest() { return nodes.get('gallery-trigger'); },
+      closest() { return missing === 'gallery-trigger' ? null : nodes.get('gallery-trigger'); },
       click() { listeners.click(); }});
   }
   const window = {scrollX: 0, scrollY: 123, scrollTo(p) { this.scrollY = p.top; }};
@@ -48,5 +48,5 @@ test('图片窗：五图固定顺序、双向循环、每图重复还原和请�
   assert.equal(open().get('gallery-image').src, sequence[0]);
 });
 test('图片窗：必要节点缺失安全退出', () => {
-  for (const id of ['gallery','gallery-image','gallery-prev','gallery-next','gallery-status']) assert.equal(open(id).pending.length, 0);
+  for (const id of ['gallery','gallery-image','gallery-prev','gallery-next','gallery-status','gallery-trigger']) assert.equal(open(id).pending.length, 0);
 });

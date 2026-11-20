@@ -99,11 +99,11 @@ Node v24.13.0、Playwright 1.58.2、Chromium 145.0.7632.0；本轮外层冻结�
 
 图片窗正式断言由 `test/language-hint.test.cjs` 引入 `test/gallery.test.cjs`，因此冻结三文件回归也会执行新断言；浏览器入口同时覆盖320/1280宽度的布局、展开还原及故障恢复。
 
-浏览器图片窗验收默认拦截 CDN 请求并返回有横竖比例的 SVG 测试图片，以稳定复现加载失败；不据此宣称真实 CDN 可用。可将本页5张实际 JPEG 预先下载至 runtime 下，命名为 `<照片ID>.jpg`，然后设置 `BROWSER_IMAGE_DIRECTORY` 使用实际照片（入口会记录每张文件的 SHA-256）。该目录及下载不进入源码；截图与结果请通过 `BROWSER_OUTPUT` 放入当前 Task 的 `evidence/.devdesk/ac0c70b1-6830-4e7c-7787-38855280747a/`。例：
+浏览器图片窗验收默认拦截 CDN 请求并返回有横竖比例的 SVG 测试图片，以稳定复现加载失败；不据此宣称真实 CDN 可用。可将本页5张实际 JPEG 预先下载至 runtime 下，命名为 `<照片ID>.jpg`，然后设置 `BROWSER_IMAGE_DIRECTORY` 使用实际照片（入口会记录每张文件的 SHA-256）。该目录及下载不进入源码；截图与结果请通过 `BROWSER_OUTPUT` 放入当前 Task 的 `evidence/.devdesk/be453639-7511-a02f-ddc7-c709dde63616/`。例：
 
 ```sh
 BROWSER_IMAGE_DIRECTORY=/tmp/devdesk-runtime/gallery-images \
-BROWSER_OUTPUT=/work/evidence/.devdesk/ac0c70b1-6830-4e7c-7787-38855280747a/browser-final \
+BROWSER_OUTPUT=/work/evidence/.devdesk/be453639-7511-a02f-ddc7-c709dde63616/browser-final \
 node test/browser-acceptance.cjs
 ```
 
