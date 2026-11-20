@@ -24,6 +24,7 @@ function open(execute = true) {
 function check(nodes, english) {
   const button = nodes.get('language-toggle');
   assert.ok(button, '语言按钮必须存在');
+  assert.equal(button.attrs.title, english ? 'Switch to Chinese' : '切换为英文');
   assert.equal(button.attrs['aria-describedby'], 'language-hint', '按钮必须精确关联语言提示');
   const hint = nodes.get('language-hint');
   assert.ok(hint, '语言提示目标必须存在');
@@ -70,4 +71,15 @@ test('英文与切回中文后全新装载均恢复默认中文', () => {
 });
 test('脚本执行前静态关联有效且默认中文', () => {
   check(open(false), false);
+});
+
+test('目标 title 随24组完整往返更新并复用节点', () => {
+  const nodes = open();
+  const original = new Map(nodes);
+  check(nodes, false);
+  for (let round = 0; round < 24; round++) {
+    click(nodes); check(nodes, true);
+    click(nodes); check(nodes, false);
+    for (const [id, node] of original) assert.strictEqual(nodes.get(id), node);
+  }
 });
