@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "status": "failed",
+  "startedAt": "2026-11-20T09:47:40.913Z",
+  "finishedAt": "2026-11-20T09:47:42.794Z",
+  "timedOut": false,
+  "signal": null,
+  "error": "Error: worker terminated: {\"code\":1,\"signal\":null}\n    at supervise (/work/test/browser-acceptance.cjs:203:65)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+}
