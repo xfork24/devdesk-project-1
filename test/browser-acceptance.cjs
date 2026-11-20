@@ -28,6 +28,12 @@ async function worker() {
     fs.mkdirSync(output, {recursive: true});
     const identity = file => ({path: file, url: pathToFileURL(file).href, sha256: hash(fs.readFileSync(file))});
     const sourceIdentity = identity(source);
+    const imageDirectory = process.env.BROWSER_IMAGE_DIRECTORY;
+    const photoIds = [417074,15286,691668,1366919,1261728];
+    const imageFiles = imageDirectory ? photoIds.map(id => identity(path.join(imageDirectory, id + '.jpg'))) : null;
+    const executable = process.env.BROWSER_EXECUTABLE || chromium.executablePath();
+    fs.accessSync(executable, fs.constants.X_OK);
+    if (process.env.FONTCONFIG_FILE) fs.accessSync(process.env.FONTCONFIG_FILE, fs.constants.R_OK);
     const baselineIdentity = baselinePath ? identity(baselinePath) : null;
     // Register the browser PID before exec, even if Playwright launch never resolves.
     const wrapper = path.join(process.env.TMPDIR, 'launch-browser');
@@ -46,6 +52,19 @@ async function worker() {
       try {
         const layout = () => page.locator('body, .language-controls, #language-toggle, main, h1, #welcome-message, #language-hint')
           .evaluateAll(nodes => nodes.map(n => ({tag: n.tagName, rect: n.getBoundingClientRect().toJSON(), font: getComputedStyle(n).font})));
+        // Deterministic image fixtures test contain with landscape and portrait ratios.
+        // Production CDN availability is a separate network observation.
+        let failImages = false;
+        const imageRequests = [];
+        await page.route('https://images.pexels.com/**', async route => {
+          const id = new URL(route.request().url()).pathname.split('/')[2];
+          imageRequests.push(id);
+          if (failImages) return route.abort();
+          if (imageDirectory) return route.fulfill({contentType: 'image/jpeg', body: fs.readFileSync(path.join(imageDirectory, id + '.jpg'))});
+          const sizes = {'417074': [4226,2847], '15286': [2500,1667], '691668': [5472,3648], '1366919': [1200,1800], '1261728': [6016,4016]};
+          const [w,h] = sizes[id];
+          return route.fulfill({contentType: 'image/svg+xml', body: `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="100%" height="100%" fill="#31586b"/><text x="10%" y="50%" font-size="100" fill="white">Fixture ${id}</text></svg>`});
+        });
         const load = async url => { await page.goto(url); await bounded(page.evaluate(() => document.fonts.ready.then(() => true)), 5000); };
         let before, baselineShot;
         if (baselineIdentity) {
@@ -92,15 +111,69 @@ async function worker() {
           await page.locator('#language-toggle').click(); await check(false);
         }
         await page.reload(); await remember(); await check(false);
-        records.push({width, height: 720, mouse: true, tab: true, enter: true, space: true,
+        const image = page.locator('#gallery-image');
+        const trigger = page.locator('#gallery-trigger');
+        const status = page.locator('#gallery-status');
+        const ready = () => page.waitForFunction(() => !document.getElementById('gallery-image').hidden);
+        await ready();
+        const sequence = [];
+        for (let i = 0; i < 5; i++) {
+          await ready();
+          const src = await image.getAttribute('src'); sequence.push(src);
+          await trigger.focus();
+          await page.evaluate(() => window.scrollTo(0, 80));
+          const scroll = await page.evaluate(() => window.scrollY);
+          const rect = await trigger.boundingBox();
+          assert.equal(rect.height, 360); assert.equal(rect.width, Math.min(width - 16, 720));
+          const fits = await image.evaluate(n => {
+            const box = n.getBoundingClientRect();
+            const scale = Math.min(box.width / n.naturalWidth, box.height / n.naturalHeight);
+            return n.naturalWidth > 0 && getComputedStyle(n).objectFit === 'contain' &&
+              n.naturalWidth * scale <= box.width + 0.1 && n.naturalHeight * scale <= box.height + 0.1;
+          });
+          assert.equal(fits, true);
+          for (let repeat = 0; repeat < 2; repeat++) {
+            await trigger.press(repeat ? 'Space' : 'Enter');
+            assert.deepEqual(await trigger.boundingBox(), {x: 0, y: 0, width, height: 720});
+            assert.equal(await page.locator('.gallery-slot').evaluate(n => n.getBoundingClientRect().height), 360);
+            assert.equal(await page.locator('.gallery-controls').evaluate(n => getComputedStyle(n).visibility), 'hidden');
+            assert.equal(await image.getAttribute('src'), src);
+            assert.equal(await image.evaluate(n => getComputedStyle(n).objectFit), 'contain');
+            await trigger.click();
+            assert.deepEqual(await trigger.boundingBox(), rect);
+            assert.equal(await page.evaluate(() => window.scrollY), scroll);
+            assert.equal(await trigger.evaluate(n => n === document.activeElement), true);
+            assert.equal(await page.locator('.gallery-controls').evaluate(n => getComputedStyle(n).visibility), 'visible');
+            assert.equal(await image.getAttribute('src'), src);
+          }
+          await page.locator('#gallery-next').click();
+        }
+        assert.equal(new Set(sequence).size, 5);
+        assert.equal(await image.getAttribute('src'), sequence[0]);
+        await page.locator('#gallery-prev').click(); await ready();
+        assert.equal(await image.getAttribute('src'), sequence[4]);
+        await page.evaluate(() => { for (let i = 0; i < 12; i++) document.getElementById('gallery-next').click(); });
+        await ready(); assert.equal(await image.getAttribute('src'), sequence[1]);
+        // Disable browser cache through routing, then force a new request to fail.
+        failImages = true;
+        await page.reload(); await remember();
+        await page.waitForFunction(() => document.getElementById('gallery-status').textContent.includes('失败'));
+        assert.equal(await image.isVisible(), false);
+        assert.equal((await trigger.boundingBox()).height, 360);
+        await page.locator('#language-toggle').click(); await check(true);
+        failImages = false;
+        await page.locator('#gallery-next').click(); await ready();
+        assert.equal((await status.textContent()).includes('失败'), false);
+        await page.screenshot({path: path.join(output, `gallery-${width}.png`), fullPage: true});
+        records.push({imageMode: imageDirectory ? 'cached Pexels JPEGs' : 'controlled SVG fixtures; CDN not verified', width, height: 720, mouse: true, tab: true, enter: true, space: true,
           staticTitle: true, title: true, roundTrips: 24, repeatedToggles: 24, refreshFromEnglish: true, refreshFromChinese: true,
-          association: true, uniqueHint: true, reusedHint: true,
+          association: true, uniqueHint: true, reusedHint: true, gallery: {photos: 5, cycles: true, repeatedRestore: true, ratio: true, failureRecovery: true, rapidSwitch: true, keyboard: true, imageRequests},
           baselineComparison: baselineIdentity ? 'passed' : 'not_requested'});
       } finally { await bounded(page.close(), 3000); }
     }
     assert.equal(hash(fs.readFileSync(source)), sourceIdentity.sha256, 'source changed during acceptance');
     if (baselineIdentity) assert.equal(hash(fs.readFileSync(baselinePath)), baselineIdentity.sha256);
-    process.send({result: {source: sourceIdentity, baseline: baselineIdentity, browser: browser.version(),
+    process.send({result: {imageFiles, source: sourceIdentity, baseline: baselineIdentity, browser: browser.version(),
       playwright: require(path.join(path.dirname(require.resolve(process.env.PLAYWRIGHT_MODULE || path.join(runtime, 'node/node_modules/playwright'))), 'package.json')).version,
       entrySha256: hash(fs.readFileSync(__filename)), node: process.version, records}});
   } finally {

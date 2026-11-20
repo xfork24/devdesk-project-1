@@ -1,6 +1,6 @@
 # 欢迎页
 
-用浏览器直接打开项目中的 `index.html`，即可看到“欢迎来到这里”标题，无需启动服务器。页面不加载外部资源。
+用浏览器直接打开项目中的 `index.html`，即可看到“欢迎来到这里”标题，无需启动服务器。欢迎文案无需网络；图片窗通过 HTTPS 加载 Pexels 外部图片，需要网络连接。
 
 独立欢迎文案默认显示“欢迎”。点击右上角的 English 按钮后显示“Welcome”，按钮变为“中文”；再次点击即可切回。按钮支持 Tab 聚焦及 Enter/空格操作。切换即时完成，不请求网络、不刷新页面、不保存语言偏好；重新打开或刷新页面恢复中文。原页面标题与 h1 保留。
 
@@ -82,3 +82,29 @@ Node v24.13.0、Playwright 1.58.2、Chromium 145.0.7632.0；本轮外层冻结�
 同目录的 `maintained-browser/` 保留本轮较早入口版本通过的结果及原始观测。`maintained-timeout/` 保留最终入口 2500ms 总超时的 exit=1 观察（操作 `exec-e7ea2264-b2ef-4779-82fa-38729c63a07b`）；`maintained-failure/` 保留不存在浏览器的 exit=1 环境失败观察（操作 `exec-01d36dde-23c4-4213-ae3d-96cbd54818b6`）。两者均正常结束监督进程并经过清理路径，不是业务 Red 或验收通过；本轮新增证据约 131 KB。语法检查通过。没有运行或宣称通过平台 Green、三文件源/候选回归、独立评审、Human 或 Git 门禁；这些仍由原工作流负责。
 
 本次目标语言 title 更新的真实浏览器结果见 `evidence/.devdesk/7f8b0ebe-1ef7-3104-f480-5c95cbfe3c48/title-verified/result.json`，原始命令观测同目录保存。使用修改前真实页面副本比较，320/1280 两种宽度布局及截图一致；鼠标、键盘、24组往返和两种状态刷新通过。以上旧轮次记录仍属历史。
+
+## 图片窗
+
+欢迎页下方固定展示5张风景照片，上一张/下一张双向循环。点击图片覆盖浏览视口，再次点击恢复原尺寸、位置、滚动和焦点；支持按钮的 Enter/空格操作及 Escape 退出。展开时隐藏切换按钮，图片始终完整等比适配。加载失败可切换后重试，刷新恢复第一张。无自动播放，不需要 API 密钥。
+
+照片选自 [Pexels](https://www.pexels.com/zh-cn/)，按 [Pexels 许可](https://www.pexels.com/license/) 使用。固定顺序如下：
+
+| 图片 | 作者 | 资源地址 |
+| --- | --- | --- |
+| [湖水倒映着群山和树林](https://www.pexels.com/photo/lake-and-mountain-417074/) | James Wheeler | [HTTPS 图片](https://images.pexels.com/photos/417074/pexels-photo-417074.jpeg?auto=compress&cs=tinysrgb&w=1920) |
+| [行人走在绿色森林的小径中](https://www.pexels.com/photo/person-walking-between-green-forest-trees-15286/) | Luis del Río | [HTTPS 图片](https://images.pexels.com/photos/15286/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1920) |
+| [云雾环绕的雪山](https://www.pexels.com/photo/landscape-photography-of-mountains-covered-in-snow-691668/) | eberhard grossgasteiger | [HTTPS 图片](https://images.pexels.com/photos/691668/pexels-photo-691668.jpeg?auto=compress&cs=tinysrgb&w=1920) |
+| [白雪覆盖的山峰](https://www.pexels.com/photo/landscape-photography-of-snowy-mountain-1366919/) | eberhard grossgasteiger | [HTTPS 图片](https://images.pexels.com/photos/1366919/pexels-photo-1366919.jpeg?auto=compress&cs=tinysrgb&w=1920) |
+| [暮光中的层叠山峦](https://www.pexels.com/photo/scenic-view-of-mountains-during-dawn-1261728/) | Stephan Seeber | [HTTPS 图片](https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?auto=compress&cs=tinysrgb&w=1920) |
+
+图片窗正式断言由 `test/language-hint.test.cjs` 引入 `test/gallery.test.cjs`，因此冻结三文件回归也会执行新断言；浏览器入口同时覆盖320/1280宽度的布局、展开还原及故障恢复。
+
+浏览器图片窗验收默认拦截 CDN 请求并返回有横竖比例的 SVG 测试图片，以稳定复现加载失败；不据此宣称真实 CDN 可用。可将本页5张实际 JPEG 预先下载至 runtime 下，命名为 `<照片ID>.jpg`，然后设置 `BROWSER_IMAGE_DIRECTORY` 使用实际照片（入口会记录每张文件的 SHA-256）。该目录及下载不进入源码；截图与结果请通过 `BROWSER_OUTPUT` 放入当前 Task 的 `evidence/.devdesk/ac0c70b1-6830-4e7c-7787-38855280747a/`。例：
+
+```sh
+BROWSER_IMAGE_DIRECTORY=/tmp/devdesk-runtime/gallery-images \
+BROWSER_OUTPUT=/work/evidence/.devdesk/ac0c70b1-6830-4e7c-7787-38855280747a/browser-final \
+node test/browser-acceptance.cjs
+```
+
+图片资源15286使用 Pexels 详情页的 `photos/15286/pexels-photo.jpg` 地址，其余使用各自编号的 JPEG 地址；不能统一推导文件名。资源服务可能暂时拒绝或中断请求，页面会显示失败并允许继续切换。

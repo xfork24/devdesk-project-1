@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "startedAt": "2026-11-20T09:49:27.380Z",
+  "finishedAt": "2026-11-20T09:49:39.938Z",
+  "timedOut": false,
+  "signal": null,
+  "imageFiles": [
+    {
+      "path": "/tmp/devdesk-runtime/gallery-images/417074.jpg",
+      "url": "file:///tmp/devdesk-runtime/gallery-images/417074.jpg",
+      "sha256": "3d3a24204b0d90bc73b709dd2131a360ee5a1cb674886108359f3845f2cc3d11"
+    },
+    {
+      "path": "/tmp/devdesk-runtime/gallery-images/15286.jpg",
+      "url": "file:///tmp/devdesk-runtime/gallery-images/15286.jpg",
+      "sha256": "32e5d250009a49742368ca0b6717aaad925ca8dc3382707e7734a00991b8aa9f"
+    },
+    {
+      "path": "/tmp/devdesk-runtime/gallery-images/691668.jpg",
+      "url": "file:///tmp/devdesk-runtime/gallery-images/691668.jpg",
+      "sha256": "13491325f6c91346edaf4d4d26384e4d371534d1b9e8af35164b4b671785a4e9"
+    },
+    {
+      "path": "/tmp/devdesk-runtime/gallery-images/1366919.jpg",
+      "url": "file:///tmp/devdesk-runtime/gallery-images/1366919.jpg",
+      "sha256": "c94cce0bf25e094b356a6a814e30e2c6b11b81992dc50eac939dab80cd8bafeb"
+    },
+    {
+      "path": "/tmp/devdesk-runtime/gallery-images/1261728.jpg",
+      "url": "file:///tmp/devdesk-runtime/gallery-images/1261728.jpg",
+      "sha256": "357163ef78c88d196c798030954f190bc6c1457d2d5ac8a7b96c26e661f65e5d"
+    }
+  ],
+  "source": {
+    "path": "/work/index.html",
+    "url": "file:///work/index.html",
+    "sha256": "a14915be3880af67385fee352c045df7506182501d550390e296a472926e6d84"
+  },
+  "baseline": null,
+  "browser": "145.0.7632.0",
+  "playwright": "1.58.2",
+  "entrySha256": "8a1116881bb165aa57ffd8c8237a364de0d9ac4a7928ad28003537eb8554b619",
+  "node": "v24.13.0",
+  "records": [
+    {
+      "imageMode": "cached Pexels JPEGs",
+      "width": 320,
+      "height": 720,
+      "mouse": true,
+      "tab": true,
+      "enter": true,
+      "space": true,
+      "staticTitle": true,
+      "title": true,
+      "roundTrips": 24,
+      "repeatedToggles": 24,
+      "refreshFromEnglish": true,
+      "refreshFromChinese": true,
+      "association": true,
+      "uniqueHint": true,
+      "reusedHint": true,
+      "gallery": {
+        "photos": 5,
+        "cycles": true,
+        "repeatedRestore": true,
+        "ratio": true,
+        "failureRecovery": true,
+        "rapidSwitch": true,
+        "keyboard": true,
+        "imageRequests": [
+          "417074",
+          "417074",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "417074",
+          "1261728",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "417074",
+          "15286"
+        ]
+      },
+      "baselineComparison": "not_requested"
+    },
+    {
+      "imageMode": "cached Pexels JPEGs",
+      "width": 1280,
+      "height": 720,
+      "mouse": true,
+      "tab": true,
+      "enter": true,
+      "space": true,
+      "staticTitle": true,
+      "title": true,
+      "roundTrips": 24,
+      "repeatedToggles": 24,
+      "refreshFromEnglish": true,
+      "refreshFromChinese": true,
+      "association": true,
+      "uniqueHint": true,
+      "reusedHint": true,
+      "gallery": {
+        "photos": 5,
+        "cycles": true,
+        "repeatedRestore": true,
+        "ratio": true,
+        "failureRecovery": true,
+        "rapidSwitch": true,
+        "keyboard": true,
+        "imageRequests": [
+          "417074",
+          "417074",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "417074",
+          "1261728",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "417074",
+          "15286"
+        ]
+      },
+      "baselineComparison": "not_requested"
+    }
+  ],
+  "error": null
+}
