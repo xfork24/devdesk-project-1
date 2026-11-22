@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "status": "failed",
+  "startedAt": "2026-11-22T16:33:14.301Z",
+  "finishedAt": "2026-11-22T16:33:20.805Z",
+  "timedOut": false,
+  "signal": null,
+  "error": "Error: AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n296 !== 304\n\n    at worker (/work/test/browser-acceptance.cjs:171:50)\n    at supervise (/work/test/browser-acceptance.cjs:325:65)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+}

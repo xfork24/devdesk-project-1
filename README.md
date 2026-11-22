@@ -1,10 +1,16 @@
 # 欢迎页
 
-用浏览器直接打开项目中的 `index.html`，即可看到“欢迎来到这里”标题，无需启动服务器。标题和语言按钮无需网络；图片窗通过 HTTPS 加载 Pexels 外部图片，需要网络连接。
+在用户 Mac 的图形登录会话中，以 Node.js ≥22 运行 `node server.cjs`，打开 `http://127.0.0.1:3000`。欢迎 Tab 保留图片窗；截图 Tab 可框选桌面区域、保存历史、点击图片放大和还原、定向删除。右上角语言按钮对所有 Tab 和异步反馈生效，刷新恢复中文。图片窗使用 Pexels 外部图片，需要网络连接。
+
+`PORT` 配置端口；`SCREENSHOT_DIRECTORY` 可指定绝对目录，默认 `~/Library/Application Support/WelcomeTabs/screenshots`。目录权限 0700，图片和元数据 0600。刷新页面、重启后台后历史保留；请勿让多个后台共用同一目录。详见 [后台接口与持久化说明](backend/README.md)。
+
+为启动后台的宿主应用检查系统设置 → 隐私与安全性 → 屏幕与系统音频录制，按系统提示授权，必要时重启后台并刷新页面后重试。取消不保存图片；捕获失败或超时请检查权限后重试；存储失败请检查目录权限和可用空间；连接失败请启动后台并重载历史。断线后先重载历史核对结果，捕获请求不会自动重试。历史读取失败保留已显示图片，使用重试按钮恢复。Linux 无法代替 Mac 桌面捕获。
+
+截图联合验收仍需真实 Mac 图形会话：绑定确切代码及系统版本，核对命令参数、取消、非浏览器桌面区域、尺寸和后台文件，执行两次截图、Tab 切换、刷新、后台重启、定向删除及权限拒绝。当前 Linux 和替身测试不证明这些事实，实际前后端并行调度也须由平台原始记录核验。
 
 页面不再显示独立“欢迎”段落和“语言切换支持键盘操作”提示，也不保留其占位或描述关联。页面标题、h1 和图片窗的全部文字随语言切换：包括按钮、图片来源说明、五张图片替代文字及加载、成功、失败、展开提示。专有名称与 Pexels 链接保持原样。右上角按钮初始显示 English，点击后变为“中文”，再次点击切回；支持 Tab 聚焦和 Enter/空格操作。切换不请求网络、不刷新页面、不保存偏好，刷新恢复中文状态。切换保留图片索引、加载请求、展开、滚动和焦点；异步回调使用当时的当前语言，过期回调忽略。按钮 title 在中文状态为“切换到英文”，英文状态为“Switch to Chinese (Simplified)”。
 
-运行测试需要 Node.js ≥22，以及对页面和测试文件的读取权限；无需安装依赖。
+运行冻结三文件及正式 HTTP 集成测试需要 Node.js ≥22，以及对页面和测试文件的读取权限；这些入口无需安装依赖。单独运行全部 `test/*.test.cjs` 时，前端自有测试还需在私有 runtime 中安装 jsdom@26.1.0，并通过 `JSDOM_MODULE` 指定模块绝对路径；浏览器入口需要下述 Playwright。
 
 在项目根目录执行：
 
@@ -16,7 +22,7 @@ node --test tests/welcome.test.cjs
 
 这些检查验证文件内容；请在浏览器打开页面，人工确认欢迎标题清晰可见。
 
-正式语言兼容测试放在 `test/`，不依赖独立测试目录：
+正式语言兼容测试放在 `test/`，不依赖独立测试目录。共享 `test/page.cjs` 在 Node 测试上下文接入 `test/screenshots-integration.test.cjs`，因此冻结三文件入口也执行真实 HTTP、会话、文件保存、重启、删除和故障恢复断言，无第三方依赖：
 
 ```sh
 node --test tests/welcome.test.cjs test/welcome-language.test.cjs
@@ -30,7 +36,7 @@ node --test tests/welcome.test.cjs test/welcome-language.test.cjs
 node --test tests/welcome.test.cjs test/*.test.cjs
 ```
 
-真实浏览器验收入口为 `test/browser-acceptance.cjs`（Linux、Node.js ≥22）。它直接读取项目 `index.html` 并打开其真实 file URL；不替换 HTML。依赖需预先装在私有运行目录：
+真实浏览器验收入口为 `test/browser-acceptance.cjs`（Linux、Node.js ≥22）。它启动实际本机 HTTP 服务并读取项目页面，不替换 HTML；截图使用生成 PNG 的捕获替身，不调用系统框选。依赖需预先装在私有运行目录：
 
 ```sh
 export DEVDESK_RUNTIME_DIR=/tmp/devdesk-runtime
@@ -52,8 +58,10 @@ node test/browser-acceptance.cjs /absolute/path/to/original.html
 | `PLAYWRIGHT_BROWSERS_PATH` | Playwright 浏览器缓存目录，应设在 runtime/cache 内 |
 | `LD_LIBRARY_PATH`、`FONTCONFIG_FILE`、`XDG_CACHE_HOME` | 可选择私有系统库、字体配置及字体缓存；相关文件仅放 runtime/cache |
 | `BROWSER_BASELINE` | 可选基线 HTML 路径；命令行第一个参数优先 |
-| `BROWSER_OUTPUT` | 截图及 `result.json` 目录；默认 `$DEVDESK_RUNTIME_DIR/browser-acceptance`；本 Task 保留证据时设为 `evidence/.devdesk/140e9e7b-5742-f990-1d4f-1bedd673a8e0/` 下的新目录 |
+| `BROWSER_OUTPUT` | 截图及 `result.json` 目录；默认 `$DEVDESK_RUNTIME_DIR/browser-acceptance`；本 Task 保留证据时设为 `evidence/.devdesk/33f51d37-ad03-02e6-527b-87355c5ac56b/` 下的新目录 |
 | `BROWSER_TIMEOUT_MS` | 总运行时限，默认 90000ms，允许 100～300000ms；清理额外约 100ms |
+
+浏览器启动前须确认共享库可解析且有可读中文字体。精简 Linux 环境可将真实字体放在私有 runtime 的 fonts/，用 FONTCONFIG_FILE 指向包含该字体目录和私有缓存目录的 fontconfig XML；入口结果的 renderedFonts 记录标题实际使用的字体。字体、配置和缓存不进入项目源码。
 
 入口在 320×720、1280×720 下检查鼠标、Tab 聚焦、Enter、Space、原有24次逐次切换、24组完整往返、静态及动态 title、英文/中文状态刷新，逐次断言按钮文字、title、lang、按钮复用、目标节点和专属段落占位不存在，并检查可见焦点。可选基线比较保留控件和标题的边界及字体、图片窗尺寸和自然上移，保存前后截图供核对；未提供基线时结果明确为 `not_requested`。每个视口输出 `updated-*.png`，指定基线时另有 `baseline-*.png`。请为每次需保留的执行选择不同输出目录。
 

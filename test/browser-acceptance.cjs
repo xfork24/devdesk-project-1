@@ -16,7 +16,7 @@ const bounded = (promise, ms) => {
 };
 
 async function worker() {
-  let server, browser;
+  let server, browser, appServer, storage;
   const records = [];
   try {
     const runtime = process.env.DEVDESK_RUNTIME_DIR || '/tmp/devdesk-runtime';
@@ -28,6 +28,13 @@ async function worker() {
     fs.mkdirSync(output, {recursive: true});
     const identity = file => ({path: file, url: pathToFileURL(file).href, sha256: hash(fs.readFileSync(file))});
     const sourceIdentity = identity(source);
+    storage = fs.mkdtempSync(path.join(process.env.TMPDIR, 'screenshots-browser-'));
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==', 'base64');
+    const app = await require('../server.cjs').createScreenshotServer({storageDirectory: storage,
+      captureRegion: async ({destination}) => { await sleep(80); fs.writeFileSync(destination, png); return {status:'captured'}; }});
+    appServer = app.server;
+    await bounded(new Promise((resolve,reject) => { appServer.once('error',reject); appServer.listen(0,'127.0.0.1',resolve); }), 3000);
+    sourceIdentity.url = `http://127.0.0.1:${appServer.address().port}/`;
     const imageDirectory = process.env.BROWSER_IMAGE_DIRECTORY;
     const photoIds = [417074,15286,691668,1366919,1261728];
     const imageFiles = imageDirectory ? photoIds.map(id => identity(path.join(imageDirectory, id + '.jpg'))) : null;
@@ -90,6 +97,16 @@ async function worker() {
           assert.equal(await staticPage.locator('#welcome-message, #language-hint, main > p').count(), 0);
         } finally { await bounded(staticContext.close(), 3000); }
         await load(sourceIdentity.url);
+        const fontSession = await page.context().newCDPSession(page);
+        let renderedFonts;
+        try {
+          await fontSession.send('DOM.enable');
+          await fontSession.send('CSS.enable');
+          const {root} = await fontSession.send('DOM.getDocument');
+          const {nodeId} = await fontSession.send('DOM.querySelector', {nodeId:root.nodeId, selector:'h1'});
+          ({fonts:renderedFonts} = await fontSession.send('CSS.getPlatformFontsForNode', {nodeId}));
+          assert.ok(renderedFonts.some(font => font.glyphCount > 0), 'heading must render with a real font');
+        } finally { await fontSession.detach(); }
         const updatedShot = await page.screenshot({path: path.join(output, `updated-${width}.png`), fullPage: true});
         if (baselineIdentity) {
           const after = await layout();
@@ -151,7 +168,7 @@ async function worker() {
           await page.evaluate(() => window.scrollTo(0, 80));
           const scroll = await page.evaluate(() => window.scrollY);
           const rect = await trigger.boundingBox();
-          assert.equal(rect.height, 360); assert.equal(rect.width, Math.min(width - 16, 720));
+          assert.equal(rect.height, 360); assert.equal(rect.width, Math.min(width - 24, 720));
           const fits = await image.evaluate(n => {
             const box = n.getBoundingClientRect();
             const scale = Math.min(box.width / n.naturalWidth, box.height / n.naturalHeight);
@@ -229,7 +246,32 @@ async function worker() {
         await page.evaluate(() => { window.controlGalleryRequests = false; });
         await page.locator('#gallery-next').click(); await ready();
         await page.screenshot({path: path.join(output, `gallery-${width}.png`), fullPage: true});
-        records.push({imageMode: imageDirectory ? 'cached Pexels JPEGs' : 'controlled SVG fixtures; CDN not verified', width, height: 720, mouse: true, tab: true, enter: true, space: true,
+        // Exercise the actual page, cookies, CSRF, script delivery and HTTP API together.
+        await page.reload();
+        await page.evaluate(() => { window.savedGallery = document.getElementById('gallery-image'); });
+        await page.locator('#screenshots-tab').click();
+        await page.waitForFunction(() => !document.getElementById('reload-screenshots').disabled);
+        const cards = page.locator('#screenshots-list img');
+        const initial = await cards.count();
+        await page.locator('#capture-screenshot').click();
+        await page.locator('#language-toggle').click();
+        await page.waitForFunction(() => !document.getElementById('capture-screenshot').disabled);
+        assert.match(await page.locator('#capture-status').textContent(), /Screenshot saved/);
+        assert.equal(await cards.count(), initial + 1);
+        const screenshot = page.locator('#screenshots-list button').first();
+        await screenshot.focus(); await screenshot.press('Enter');
+        assert.equal(await screenshot.getAttribute('aria-expanded'), 'true');
+        await screenshot.press('Space');
+        assert.equal(await screenshot.getAttribute('aria-expanded'), 'false');
+        assert.equal(await screenshot.evaluate(n => n === document.activeElement), true);
+        await page.locator('#screenshots-tab').press('Home');
+        assert.equal(await page.locator('#welcome-panel').isVisible(), true);
+        assert.equal(await page.evaluate(() => window.savedGallery === document.getElementById('gallery-image')), true);
+        await page.reload(); await page.locator('#screenshots-tab').click();
+        await page.waitForFunction(n => document.querySelectorAll('#screenshots-list img').length === n, initial + 1);
+        await page.locator('.screenshot-delete').first().click();
+        await page.waitForFunction(n => document.querySelectorAll('#screenshots-list img').length === n, initial);
+        records.push({renderedFonts, screenshots: {http: true, captureFixture: true, asyncLanguage: true, keyboardZoom: true, reload: true, delete: true}, imageMode: imageDirectory ? 'cached Pexels JPEGs' : 'controlled SVG fixtures; CDN not verified', width, height: 720, mouse: true, tab: true, enter: true, space: true,
           staticTitle: true, title: true, roundTrips: 24, repeatedToggles: 24, refreshFromEnglish: true, refreshFromChinese: true,
           noDanglingDescription: true, removedDescriptions: true, reusedButton: true, visibleFocus: true, gallery: {photos: 5, cycles: true, repeatedRestore: true, ratio: true, failureRecovery: true, expandedFailureRecovery: true, staleExpandedCallbacks: true, rapidSwitch: true, keyboard: true, imageRequests},
           baselineComparison: baselineIdentity ? 'passed; natural gallery shift allowed' : 'not_requested'});
@@ -239,10 +281,17 @@ async function worker() {
     if (baselineIdentity) assert.equal(hash(fs.readFileSync(baselinePath)), baselineIdentity.sha256);
     process.send({result: {imageFiles, source: sourceIdentity, baseline: baselineIdentity, browser: browser.version(),
       playwright: require(path.join(path.dirname(require.resolve(process.env.PLAYWRIGHT_MODULE || path.join(runtime, 'node/node_modules/playwright'))), 'package.json')).version,
+      applicationFiles: ['server.cjs','backend/capture.cjs','backend/store.cjs','public/screenshots.js'].map(file => identity(path.resolve(__dirname,'..',file))),
       entrySha256: hash(fs.readFileSync(__filename)), node: process.version, records}});
   } finally {
     try { if (browser) await bounded(browser.close(), 3000); }
-    finally { if (server) await bounded(server.close(), 3000); }
+    finally {
+      try { if (server) await bounded(server.close(), 3000); }
+      finally {
+        try { if (appServer) { appServer.closeAllConnections(); await bounded(new Promise(r => appServer.close(r)), 3000); } }
+        finally { if (storage) fs.rmSync(storage, {recursive:true,force:true}); }
+      }
+    }
   }
 }
 
