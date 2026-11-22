@@ -50,7 +50,7 @@
         <button id="gallery-next" type="button">下一张</button>
       </div>
       <p id="gallery-status" role="status" aria-live="polite">正在加载图片…</p>
-      <p>图片来自 <a href="https://www.pexels.com/zh-cn/">Pexels</a> · 点击图片放大或还原</p>
+      <p><span id="gallery-credit">图片来自 </span><a href="https://www.pexels.com/zh-cn/">Pexels</a><span id="gallery-help"> · 点击图片放大或还原</span></p>
     </section>
   </main>
   <script>
@@ -59,22 +59,39 @@
       if (!button) return;
 
       let language = 'zh';
+      const messages = {
+        zh: {
+          welcome: '欢迎来到这里', gallery: '自然风景图片窗', prev: '上一张', next: '下一张',
+          credit: '图片来自 ', help: ' · 点击图片放大或还原',
+          expand: '放大图片，再次点击还原', restore: '还原图片',
+          loading: '正在加载第 {number} / 5 张图片…', ready: '第 {number} / 5 张 · {author}',
+          error: '第 {number} / 5 张加载失败，请切换图片后重试。',
+          alts: ['湖水倒映着群山和树林', '行人走在绿色森林的小径中', '云雾环绕的雪山', '白雪覆盖的山峰', '暮光中的层叠山峦']
+        },
+        en: {
+          welcome: 'Welcome here', gallery: 'Nature photo gallery', prev: 'Previous', next: 'Next',
+          credit: 'Photos from ', help: ' · Click the image to enlarge or restore',
+          expand: 'Enlarge image; click again to restore', restore: 'Restore image',
+          loading: 'Loading image {number} / 5…', ready: 'Image {number} / 5 · {author}',
+          error: 'Image {number} / 5 failed to load. Switch images to retry.',
+          alts: ['A lake reflecting mountains and trees', 'A person walking along a green forest path', 'Snowy mountains surrounded by clouds', 'Snow-covered mountain peaks', 'Layered mountains at twilight']
+        }
+      };
+      const t = (key, params = {}) => messages[language][key].replace(/\{(\w+)\}/g, (_, name) => params[name]);
+      let renderGalleryText = () => {};
       function renderLanguage(nextLanguage) {
         language = nextLanguage;
+        document.title = t('welcome');
+        if (document.documentElement) document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
+        const heading = document.querySelector('h1');
+        if (heading) heading.textContent = t('welcome');
         button.setAttribute('title', language === 'zh' ? '切换到英文' : 'Switch to Chinese (Simplified)');
         button.textContent = language === 'zh' ? 'English' : '中文';
         button.setAttribute('lang', language === 'zh' ? 'en' : 'zh');
-
+        renderGalleryText();
       }
-
       renderLanguage(language);
-      button.addEventListener('click', () => {
-        renderLanguage(language === 'zh' ? 'en' : 'zh');
-      });
-    })();
-  </script>
-  <script>
-    (() => {
+      button.addEventListener('click', () => renderLanguage(language === 'zh' ? 'en' : 'zh'));
       const gallery = document.getElementById('gallery');
       const image = document.getElementById('gallery-image');
       const prev = document.getElementById('gallery-prev');
@@ -120,27 +137,41 @@
                 "alt": "暮光中的层叠山峦"
         }
 ];
-      let index = 0, expanded = false, request = 0;
+      let index = 0, expanded = false, request = 0, phase = 'loading';
+      renderGalleryText = () => {
+        gallery.setAttribute('aria-label', t('gallery'));
+        prev.textContent = t('prev');
+        next.textContent = t('next');
+        for (const [id, key] of [['gallery-credit', 'credit'], ['gallery-help', 'help']]) {
+          const node = document.getElementById(id);
+          if (node) node.textContent = t(key);
+        }
+        image.alt = messages[language].alts[index];
+        trigger.setAttribute('aria-label', t(expanded ? 'restore' : 'expand'));
+        status.textContent = t(phase, {number: index + 1, author: photos[index].author});
+      };
       let savedFocus, savedScroll, savedOverflow;
       function show() {
         const photo = photos[index];
         const token = ++request;
         image.hidden = true;
-        image.alt = photo.alt;
+        phase = 'loading';
         image.src = photo.src;
-        status.textContent = `正在加载第 ${index + 1} / 5 张图片…`;
+        renderGalleryText();
         // A separate Image owns each request, so a stale event cannot complete a newer one.
         const pending = new Image();
         pending.onload = () => {
           if (token !== request) return;
           image.hidden = false;
-          status.textContent = `第 ${index + 1} / 5 张 · ${photo.author}`;
+          phase = 'ready';
+          renderGalleryText();
         };
         pending.onerror = () => {
           if (token !== request) return;
           setExpanded(false);
           image.hidden = true;
-          status.textContent = `第 ${index + 1} / 5 张加载失败，请切换图片后重试。`;
+          phase = 'error';
+          renderGalleryText();
         };
         pending.src = photo.src;
       }
@@ -160,7 +191,7 @@
         }
         gallery.classList.toggle('expanded', expanded);
         trigger.setAttribute('aria-expanded', String(expanded));
-        trigger.setAttribute('aria-label', expanded ? '还原图片' : '放大图片，再次点击还原');
+        renderGalleryText();
         if (!expanded) {
           document.body.style.overflow = savedOverflow;
           if (savedFocus && savedFocus.focus) savedFocus.focus({preventScroll: true});

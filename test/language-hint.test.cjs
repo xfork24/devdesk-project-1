@@ -4,23 +4,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
-const html = fs.readFileSync(path.resolve(__dirname, '../index.html'), 'utf8');
-function open(execute = true) {
-  const nodes = new Map();
-  const allNodes = [];
-  for (const m of html.matchAll(/<([a-z][\w:-]*)\b([^>]*)>/gi)) {
-    const attrs = Object.fromEntries([...m[2].matchAll(/([\w-]+)="([^"]*)"/g)].map(a => [a[1], a[2]]));
-    const node = {textContent: html.slice(m.index + m[0].length).split('<')[0], attrs, listeners: [],
-      setAttribute(k, v) { this.attrs[k] = v; },
-      addEventListener(type, fn) { this.listeners.push({type, fn}); }};
-    allNodes.push(node);
-    if (attrs.id && !nodes.has(attrs.id)) nodes.set(attrs.id, node);
-  }
-  nodes.allNodes = allNodes;
-  const context = vm.createContext({document: {getElementById: id => nodes.get(id)}});
-  if (execute) for (const s of html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) vm.runInContext(s[1], context);
-  return nodes;
-}
+const {open: load, html} = require('./page.cjs');
+const open = (execute = true) => load(undefined, execute).nodes;
 function check(nodes, english) {
   const button = nodes.get('language-toggle');
   assert.ok(button, '语言按钮必须存在');
