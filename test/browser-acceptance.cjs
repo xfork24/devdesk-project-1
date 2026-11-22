@@ -50,7 +50,7 @@ async function worker() {
       page.setDefaultTimeout(5000);
       page.setDefaultNavigationTimeout(10000);
       try {
-        const layout = () => page.locator('body, .language-controls, #language-toggle, main, h1, #welcome-message, #language-hint')
+        const layout = () => page.locator('body, .language-controls, #language-toggle, main, h1, #gallery')
           .evaluateAll(nodes => nodes.map(n => ({tag: n.tagName, rect: n.getBoundingClientRect().toJSON(), font: getComputedStyle(n).font})));
         // Deterministic image fixtures test contain with landscape and portrait ratios.
         // Production CDN availability is a separate network observation.
@@ -87,32 +87,38 @@ async function worker() {
           const staticPage = await staticContext.newPage();
           await staticPage.goto(sourceIdentity.url, {timeout: 10000});
           assert.equal(await staticPage.locator('#language-toggle').getAttribute('title', {timeout: 5000}), '切换到英文');
+          assert.equal(await staticPage.locator('#welcome-message, #language-hint, main > p').count(), 0);
         } finally { await bounded(staticContext.close(), 3000); }
         await load(sourceIdentity.url);
         const updatedShot = await page.screenshot({path: path.join(output, `updated-${width}.png`), fullPage: true});
         if (baselineIdentity) {
-          assert.deepEqual(await layout(), before, 'baseline layout');
-          assert.equal(hash(updatedShot), hash(baselineShot), 'baseline screenshot');
+          const after = await layout();
+          for (const i of [1, 2, 4]) assert.deepEqual(after[i], before[i], 'retained controls and heading layout');
+          const oldGallery = before.at(-1), newGallery = after.at(-1);
+          assert.equal(newGallery.font, oldGallery.font);
+          for (const key of ['x', 'width', 'height']) assert.equal(newGallery.rect[key], oldGallery.rect[key]);
+          assert.ok(newGallery.rect.y < oldGallery.rect.y, 'gallery naturally moves up after removal');
         }
-        const remember = () => page.evaluate(() => { window.originalHint = document.getElementById('language-hint'); });
+        const remember = () => page.evaluate(() => { window.originalButton = document.getElementById('language-toggle'); });
         const check = async english => {
-          assert.equal(await page.locator('#language-toggle').getAttribute('title'), english ? 'Switch to Chinese (Simplified)' : '切换到英文');
-          assert.equal(await page.locator('#language-toggle').getAttribute('aria-describedby'), 'language-hint');
-          assert.equal(await page.locator('*').evaluateAll(ns => ns.filter(n => n.id === 'language-hint').length), 1);
-          assert.equal(await page.evaluate(() => window.originalHint === document.getElementById('language-hint')), true);
-          for (const [id, text, lang] of [
-            ['welcome-message', english ? 'Welcome' : '欢迎', english ? 'en' : 'zh'],
-            ['language-toggle', english ? '中文' : 'English', english ? 'zh' : 'en'],
-            ['language-hint', english ? 'Language switching supports keyboard controls' : '语言切换支持键盘操作', english ? 'en' : 'zh']]) {
-            assert.equal(await page.locator('#' + id).textContent(), text);
-            assert.equal(await page.locator('#' + id).getAttribute('lang'), lang);
-          }
+          const button = page.locator('#language-toggle');
+          assert.equal(await button.getAttribute('title'), english ? 'Switch to Chinese (Simplified)' : '切换到英文');
+          assert.equal(await button.getAttribute('aria-describedby'), null);
+          assert.equal(await page.locator('#welcome-message, #language-hint').count(), 0);
+          assert.equal(await page.evaluate(() => window.originalButton === document.getElementById('language-toggle')), true);
+          assert.equal(await button.textContent(), english ? '中文' : 'English');
+          assert.equal(await button.getAttribute('lang'), english ? 'zh' : 'en');
+          assert.equal(await page.locator('h1').textContent(), '欢迎来到这里');
+          assert.equal(await page.title(), '欢迎来到这里');
+          assert.equal(await page.locator('main > p').count(), 0, 'no dedicated paragraph placeholders');
         };
         await remember(); await check(false);
         await page.locator('#language-toggle').click(); await check(true);
         await page.reload(); await remember(); await check(false);
         await page.keyboard.press('Tab');
         assert.equal(await page.locator('#language-toggle').evaluate(n => n === document.activeElement), true);
+        assert.equal(await page.locator('#language-toggle').evaluate(n => getComputedStyle(n).outlineStyle), 'solid');
+        assert.equal(await page.locator('#language-toggle').evaluate(n => getComputedStyle(n).outlineWidth), '3px');
         await page.keyboard.press('Enter'); await check(true);
         await page.keyboard.press('Space'); await check(false);
         for (let i = 1; i <= 24; i++) { await page.locator('#language-toggle').click(); await check(i % 2 === 1); }
@@ -210,8 +216,8 @@ async function worker() {
         await page.screenshot({path: path.join(output, `gallery-${width}.png`), fullPage: true});
         records.push({imageMode: imageDirectory ? 'cached Pexels JPEGs' : 'controlled SVG fixtures; CDN not verified', width, height: 720, mouse: true, tab: true, enter: true, space: true,
           staticTitle: true, title: true, roundTrips: 24, repeatedToggles: 24, refreshFromEnglish: true, refreshFromChinese: true,
-          association: true, uniqueHint: true, reusedHint: true, gallery: {photos: 5, cycles: true, repeatedRestore: true, ratio: true, failureRecovery: true, expandedFailureRecovery: true, staleExpandedCallbacks: true, rapidSwitch: true, keyboard: true, imageRequests},
-          baselineComparison: baselineIdentity ? 'passed' : 'not_requested'});
+          noDanglingDescription: true, removedDescriptions: true, reusedButton: true, visibleFocus: true, gallery: {photos: 5, cycles: true, repeatedRestore: true, ratio: true, failureRecovery: true, expandedFailureRecovery: true, staleExpandedCallbacks: true, rapidSwitch: true, keyboard: true, imageRequests},
+          baselineComparison: baselineIdentity ? 'passed; natural gallery shift allowed' : 'not_requested'});
       } finally { await bounded(page.close(), 3000); }
     }
     assert.equal(hash(fs.readFileSync(source)), sourceIdentity.sha256, 'source changed during acceptance');

@@ -1,10 +1,8 @@
 # 欢迎页
 
-用浏览器直接打开项目中的 `index.html`，即可看到“欢迎来到这里”标题，无需启动服务器。欢迎文案无需网络；图片窗通过 HTTPS 加载 Pexels 外部图片，需要网络连接。
+用浏览器直接打开项目中的 `index.html`，即可看到“欢迎来到这里”标题，无需启动服务器。标题和语言按钮无需网络；图片窗通过 HTTPS 加载 Pexels 外部图片，需要网络连接。
 
-独立欢迎文案默认显示“欢迎”。点击右上角的 English 按钮后显示“Welcome”，按钮变为“中文”；再次点击即可切回。按钮支持 Tab 聚焦及 Enter/空格操作。切换即时完成，不请求网络、不刷新页面、不保存语言偏好；重新打开或刷新页面恢复中文。原页面标题与 h1 保留。
-
-欢迎文字下的提示默认显示“语言切换支持键盘操作”，英文状态显示“Language switching supports keyboard controls”，切回或刷新后恢复中文。提示随页面自然换行。按钮 title 在中文状态精确为“切换到英文”，英文状态精确为“Switch to Chinese (Simplified)”，静态页面及刷新均从中文目标提示开始。
+页面不再显示独立“欢迎”段落和“语言切换支持键盘操作”提示，也不保留其占位或描述关联。页面标题、h1“欢迎来到这里”和图片窗保留。右上角按钮初始显示 English，点击后变为“中文”，再次点击切回；支持 Tab 聚焦和 Enter/空格操作。切换不请求网络、不刷新页面、不保存偏好，刷新恢复中文状态。按钮 title 在中文状态为“切换到英文”，英文状态为“Switch to Chinese (Simplified)”。
 
 运行测试需要 Node.js ≥22，以及对页面和测试文件的读取权限；无需安装依赖。
 
@@ -26,7 +24,7 @@ node --test tests/welcome.test.cjs test/welcome-language.test.cjs
 
 新增测试执行实际页面脚本，检查初始中文、连续双向切换、重新装载恢复中文和节点缺失时安全退出。它使用最小 DOM 替身，不验证浏览器布局或键盘事件；请在浏览器及窄视口核对按钮位于右上方、焦点可见且不遮挡欢迎内容。
 
-提示正式测试位于 `test/language-hint.test.cjs`，覆盖静态与初始化提示及 title、原有24次逐次切换、24组完整往返及两种语言状态重新装载。运行全部正式及既有测试：
+描述移除正式测试位于 `test/language-hint.test.cjs`，覆盖静态与初始化无目标节点、无悬空关联、title、24次逐次切换、24组完整往返及两种语言状态重新装载；同时接入图片窗断言。运行全部正式及既有测试：
 
 ```sh
 node --test tests/welcome.test.cjs test/*.test.cjs
@@ -54,14 +52,18 @@ node test/browser-acceptance.cjs /absolute/path/to/original.html
 | `PLAYWRIGHT_BROWSERS_PATH` | Playwright 浏览器缓存目录，应设在 runtime/cache 内 |
 | `LD_LIBRARY_PATH`、`FONTCONFIG_FILE`、`XDG_CACHE_HOME` | 可选择私有系统库、字体配置及字体缓存；相关文件仅放 runtime/cache |
 | `BROWSER_BASELINE` | 可选基线 HTML 路径；命令行第一个参数优先 |
-| `BROWSER_OUTPUT` | 截图及 `result.json` 目录；默认 `$DEVDESK_RUNTIME_DIR/browser-acceptance`，可选新的小体积验收证据目录 |
+| `BROWSER_OUTPUT` | 截图及 `result.json` 目录；默认 `$DEVDESK_RUNTIME_DIR/browser-acceptance`；本 Task 保留证据时设为 `evidence/.devdesk/baf8d48c-517e-ea55-8eb6-2aaa0544a97d/` 下的新目录 |
 | `BROWSER_TIMEOUT_MS` | 总运行时限，默认 90000ms，允许 100～300000ms；清理额外约 100ms |
 
-入口在 320×720、1280×720 下检查鼠标、Tab 聚焦、Enter、Space、原有24次逐次切换、24组完整往返、静态及动态 title、英文/中文状态刷新，逐次断言三处文案及 lang、精确 ARIA 关联、全部元素中的提示 ID 唯一和节点复用。可选基线比较元素边界、字体和初始截图字节；未提供基线时结果明确为 `not_requested`。每个视口输出 `updated-*.png`，指定基线时另有 `baseline-*.png`。请为每次需保留的执行选择不同输出目录。
+入口在 320×720、1280×720 下检查鼠标、Tab 聚焦、Enter、Space、原有24次逐次切换、24组完整往返、静态及动态 title、英文/中文状态刷新，逐次断言按钮文字、title、lang、按钮复用、目标节点和专属段落占位不存在，并检查可见焦点。可选基线比较保留控件和标题的边界及字体、图片窗尺寸和自然上移，保存前后截图供核对；未提供基线时结果明确为 `not_requested`。每个视口输出 `updated-*.png`，指定基线时另有 `baseline-*.png`。请为每次需保留的执行选择不同输出目录。
 
 stdout 最后一行为 JSON，`result.json` 保存同一结果：`status`、起止时间、`timedOut`、`signal`、`error`；成功时还有源码/基线路径、file URL、SHA-256、入口摘要、Node/Playwright/浏览器版本及各视口 `records`。通过退出 0；断言、环境、超时、关闭失败退出非 0。启动配置错误可能只向 stderr 输出失败 JSON。原始命令观测由执行平台另行保存，结果文件不替代它，也不替代独立 Red/Green 或三文件平台回归。
 
 worker 使用 try/finally 关闭页面、连接和浏览器服务；监督进程约束整个 worker，超时或 SIGINT/SIGTERM 时强制结束自己创建的进程组及已登记浏览器进程组，删除私有临时 profile。入口在私有临时目录自动生成启动包装器，在 exec 浏览器前记录 PID，使启动未完成时也能清理；无需人工临时脚本。启动也受 Playwright 15 秒时限约束。字体等待、截图和关闭均有界；字体缺失会影响真实外观，须配置实际所需字体。SIGKILL、宿主崩溃或系统 PID 资源耗尽可能阻止清理代码运行，需操作者维护后重跑，不可将清理视为验收通过。此前尝试出现过 PID 资源耗尽，操作者清理属于维护；已冻结成功/失败观察继续保留，本入口通过不撤销旧失败，也不证明所有故障恢复路径均已验证。下载、系统库、浏览器、缓存及临时文件均不得放入 `/work`。
+
+本次删除描述的浏览器验收使用修改前实际页面副本对照，两种视口均通过，允许删除段落后的图片窗自然上移。结果、前后截图及原生命令观测保存在 [当前验收目录](evidence/.devdesk/baf8d48c-517e-ea55-8eb6-2aaa0544a97d/browser-final/result.json)。图片使用可控 SVG 素材，未验证 CDN 可用性；独立 Green 和冻结三文件回归仍由平台执行。
+
+## 历史验收记录（以下为此前版本）
 
 本次入口维护验收依据冻结输入 `execution-input:96c1af72-b074-9a0f-bd0a-a18e5707ca10` 的 task、design、implementation、workspace、recipe、red、test_configuration；workspace 输出 `0d504c60-5d2a-f86a-2155-4d180944c574` 已读完全部 205612 字节，版本 `7ada7ac2d09bad96d405897c20cac5e006d96a23`。页面 SHA-256 保持 `352e34fcd4a5193f44327d085461ae8c49c539bfccf7886f010d63b6d47bf525`；本轮仅维护入口和本说明，另新增验收证据。独立测试、正式 language-hint 断言和既有证据未修改。
 
@@ -99,11 +101,11 @@ Node v24.13.0、Playwright 1.58.2、Chromium 145.0.7632.0；本轮外层冻结�
 
 图片窗正式断言由 `test/language-hint.test.cjs` 引入 `test/gallery.test.cjs`，因此冻结三文件回归也会执行新断言；浏览器入口同时覆盖320/1280宽度的布局、展开还原及故障恢复。
 
-浏览器图片窗验收默认拦截 CDN 请求并返回有横竖比例的 SVG 测试图片，以稳定复现加载失败；不据此宣称真实 CDN 可用。可将本页5张实际 JPEG 预先下载至 runtime 下，命名为 `<照片ID>.jpg`，然后设置 `BROWSER_IMAGE_DIRECTORY` 使用实际照片（入口会记录每张文件的 SHA-256）。该目录及下载不进入源码；截图与结果请通过 `BROWSER_OUTPUT` 放入当前 Task 的 `evidence/.devdesk/be453639-7511-a02f-ddc7-c709dde63616/`。例：
+浏览器图片窗验收默认拦截 CDN 请求并返回有横竖比例的 SVG 测试图片，以稳定复现加载失败；不据此宣称真实 CDN 可用。可将本页5张实际 JPEG 预先下载至 runtime 下，命名为 `<照片ID>.jpg`，然后设置 `BROWSER_IMAGE_DIRECTORY` 使用实际照片（入口会记录每张文件的 SHA-256）。该目录及下载不进入源码；截图与结果请通过 `BROWSER_OUTPUT` 放入当前 Task 的 `evidence/.devdesk/baf8d48c-517e-ea55-8eb6-2aaa0544a97d/`。例：
 
 ```sh
 BROWSER_IMAGE_DIRECTORY=/tmp/devdesk-runtime/gallery-images \
-BROWSER_OUTPUT=/work/evidence/.devdesk/be453639-7511-a02f-ddc7-c709dde63616/browser-final \
+BROWSER_OUTPUT=/work/evidence/.devdesk/baf8d48c-517e-ea55-8eb6-2aaa0544a97d/browser-final \
 node test/browser-acceptance.cjs
 ```
 
@@ -111,4 +113,4 @@ node test/browser-acceptance.cjs
 
 加载中也可展开图片；当前加载失败时自动退出展开，恢复原尺寸、滚动位置和焦点，显示失败提示与切换按钮。过期请求的回调不会影响当前展开状态。
 
-定向修复正式测试命令：`node --test test/gallery.test.cjs`。浏览器入口在两个视口以可控预加载回调覆盖“加载中→展开→失败→恢复→切换成功”，并检查过期 load/error 不关闭新展开；真实图片元素及布局仍使用实际页面。当前 Task 的浏览器输出应设置为 `evidence/.devdesk/6082d737-49cc-c59d-90ad-753d17d57f83/` 下的新目录。
+定向修复正式测试命令：`node --test test/gallery.test.cjs`。浏览器入口在两个视口以可控预加载回调覆盖“加载中→展开→失败→恢复→切换成功”，并检查过期 load/error 不关闭新展开；真实图片元素及布局仍使用实际页面。当前 Task 的浏览器输出应设置为 `evidence/.devdesk/baf8d48c-517e-ea55-8eb6-2aaa0544a97d/` 下的新目录。
