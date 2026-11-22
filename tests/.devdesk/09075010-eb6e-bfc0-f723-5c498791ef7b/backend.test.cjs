@@ -3,13 +3,14 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const os = require('node:os');
 const {randomUUID} = require('node:crypto');
 const {createScreenshotServer} = require('../../../server.cjs');
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==', 'base64');
 const pause = ms => new Promise(r => setTimeout(r, ms));
 function deferred() { let resolve; const promise = new Promise(r => {resolve = r;}); return {promise, resolve}; }
 async function fixture(t, options = {}) {
-  const directory = await fs.mkdtemp(path.join(__dirname, 'run-'));
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'welcometabs-backend-'));
   const servers = [];
   t.after(async () => {
     for (const s of servers) { s.closeAllConnections(); await new Promise(r => s.close(r)); }

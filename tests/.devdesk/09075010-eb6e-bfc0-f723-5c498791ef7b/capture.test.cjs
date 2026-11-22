@@ -3,10 +3,11 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs/promises');
 const path=require('node:path');
+const os=require('node:os');
 const {EventEmitter}=require('node:events');
 const {captureRegion}=require('../../../backend/capture.cjs');
 async function destination(t) {
-  const dir=await fs.mkdtemp(path.join(__dirname,'capture-'));
+  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'welcometabs-capture-'));
   t.after(()=>fs.rm(dir,{recursive:true,force:true})); return path.join(dir,'image.png');
 }
 function child() {
