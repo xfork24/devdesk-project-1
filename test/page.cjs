@@ -29,3 +29,6 @@ function open(missing, execute = true) {
   return {nodes, get: id => nodes.get(id), pending, window, document, listeners: nodes.get('language-toggle').listeners};
 }
 module.exports = {open, html};
+
+// The frozen language entries load this helper; register formal integration once.
+if (process.env.NODE_TEST_CONTEXT) require('./screenshots-integration.test.cjs');

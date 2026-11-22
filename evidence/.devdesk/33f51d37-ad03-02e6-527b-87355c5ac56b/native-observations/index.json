@@ -1,0 +1,90 @@
+[
+  {
+    "source": "/run/devdesk/command-output/236afe4585f58281efa87f90d0947255dbf14b0c2b83056d002e84d1ee731a65.json",
+    "copy": "/work/evidence/.devdesk/33f51d37-ad03-02e6-527b-87355c5ac56b/native-observations/236afe4585f58281efa87f90d0947255dbf14b0c2b83056d002e84d1ee731a65.json",
+    "sha256": "d6d624f75ff489cf854c0d3f3facdafc123db5cc57f5998263b797a2e09aa0cf",
+    "item_keys": [
+      "aggregatedOutput",
+      "command",
+      "commandActions",
+      "completedAtMs",
+      "cwd",
+      "durationMs",
+      "exitCode",
+      "id",
+      "pluginId",
+      "processId",
+      "scriptPath",
+      "source",
+      "startedAtMs",
+      "status",
+      "type"
+    ]
+  },
+  {
+    "source": "/run/devdesk/command-output/f2eff2a18a1242cf137b174c4074be1624b851f2bd2d2836772f4264c2e007b9.json",
+    "copy": "/work/evidence/.devdesk/33f51d37-ad03-02e6-527b-87355c5ac56b/native-observations/f2eff2a18a1242cf137b174c4074be1624b851f2bd2d2836772f4264c2e007b9.json",
+    "sha256": "2ee5b39bbebf91af77671cf0fe775d0747b979ebcbcdab283f9091ee4cdd469b",
+    "item_keys": [
+      "aggregatedOutput",
+      "command",
+      "commandActions",
+      "completedAtMs",
+      "cwd",
+      "durationMs",
+      "exitCode",
+      "id",
+      "pluginId",
+      "processId",
+      "scriptPath",
+      "source",
+      "startedAtMs",
+      "status",
+      "type"
+    ]
+  },
+  {
+    "source": "/run/devdesk/command-output/7d558b746dc92d66821489a844936b2b122d25d0838f5cba176cb6dc90f25b7a.json",
+    "copy": "/work/evidence/.devdesk/33f51d37-ad03-02e6-527b-87355c5ac56b/native-observations/7d558b746dc92d66821489a844936b2b122d25d0838f5cba176cb6dc90f25b7a.json",
+    "sha256": "f7004b5cc89c5ce77ab72176efad0b17bb2ccc395e8fb2bdcd12aebe58de23bf",
+    "item_keys": [
+      "aggregatedOutput",
+      "command",
+      "commandActions",
+      "completedAtMs",
+      "cwd",
+      "durationMs",
+      "exitCode",
+      "id",
+      "pluginId",
+      "processId",
+      "scriptPath",
+      "source",
+      "startedAtMs",
+      "status",
+      "type"
+    ]
+  },
+  {
+    "source": "/run/devdesk/command-output/d49f8388a0dfe96c9252521386e3cdf8c3a72041c0f3c7f6db6b696c460e22e2.json",
+    "copy": "/work/evidence/.devdesk/33f51d37-ad03-02e6-527b-87355c5ac56b/native-observations/d49f8388a0dfe96c9252521386e3cdf8c3a72041c0f3c7f6db6b696c460e22e2.json",
+    "sha256": "b78ac480cabbe485880c4e3d33b4987183fc3336498796d83dc17d69acaa4d76",
+    "item_keys": [
+      "aggregatedOutput",
+      "command",
+      "commandActions",
+      "completedAtMs",
+      "cwd",
+      "durationMs",
+      "exitCode",
+      "id",
+      "pluginId",
+      "processId",
+      "scriptPath",
+      "source",
+      "startedAtMs",
+      "status",
+      "type"
+    ]
+  }
+]

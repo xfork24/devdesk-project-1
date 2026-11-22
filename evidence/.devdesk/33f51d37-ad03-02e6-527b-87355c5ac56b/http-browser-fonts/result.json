@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "status": "failed",
+  "startedAt": "2026-11-22T16:33:02.727Z",
+  "finishedAt": "2026-11-22T16:33:04.909Z",
+  "timedOut": false,
+  "signal": null,
+  "error": "Error: cdpSession.send: Protocol error (CSS.getPlatformFontsForNode): CSS agent was not enabled\n    at worker (/work/test/browser-acceptance.cjs:105:54)\n    at supervise (/work/test/browser-acceptance.cjs:323:65)\n    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+}
