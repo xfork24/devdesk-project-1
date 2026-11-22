@@ -108,8 +108,19 @@ async function worker() {
           assert.equal(await page.evaluate(() => window.originalButton === document.getElementById('language-toggle')), true);
           assert.equal(await button.textContent(), english ? '中文' : 'English');
           assert.equal(await button.getAttribute('lang'), english ? 'zh' : 'en');
-          assert.equal(await page.locator('h1').textContent(), '欢迎来到这里');
-          assert.equal(await page.title(), '欢迎来到这里');
+          assert.equal(await page.locator('h1').textContent(), english ? 'Welcome here' : '欢迎来到这里');
+          assert.equal(await page.title(), english ? 'Welcome here' : '欢迎来到这里');
+          assert.equal(await page.locator('html').getAttribute('lang'), english ? 'en' : 'zh-CN');
+          assert.equal(await page.locator('#gallery-prev').textContent(), english ? 'Previous' : '上一张');
+          assert.equal(await page.locator('#gallery-next').textContent(), english ? 'Next' : '下一张');
+          assert.match(await page.locator('#gallery-help').textContent(), english ? /Click.*enlarge/ : /点击图片放大或还原/);
+          assert.equal(await page.locator('#gallery').getAttribute('aria-label'), english ? 'Nature photo gallery' : '自然风景图片窗');
+          if (english) {
+            for (const selector of ['#gallery-credit', '#gallery-help', '#gallery-status']) {
+              assert.doesNotMatch(await page.locator(selector).textContent(), /[\u3400-\u9fff]|undefined/);
+            }
+            assert.doesNotMatch(await page.locator('#gallery-image').getAttribute('alt'), /[\u3400-\u9fff]/);
+          }
           assert.equal(await page.locator('main > p').count(), 0, 'no dedicated paragraph placeholders');
         };
         await remember(); await check(false);
@@ -190,6 +201,10 @@ async function worker() {
         await trigger.evaluate(n => n.click());
         assert.deepEqual(await trigger.boundingBox(), {x: 0, y: 0, width, height: 720});
         assert.equal(await page.evaluate(() => document.body.style.overflow), 'hidden');
+        await page.locator('#language-toggle').evaluate(n => n.click()); await check(false);
+        assert.equal(await trigger.getAttribute('aria-expanded'), 'true');
+        await page.locator('#language-toggle').evaluate(n => n.click()); await check(true);
+        assert.equal(await trigger.getAttribute('aria-label'), 'Restore image');
         await page.evaluate(() => window.galleryRequests[0].onerror());
         assert.equal(await trigger.getAttribute('aria-expanded'), 'false');
         assert.equal(await page.evaluate(() => document.body.style.overflow), 'auto');
@@ -198,7 +213,7 @@ async function worker() {
         assert.equal(await page.locator('#gallery-prev').evaluate(n => n === document.activeElement), true);
         assert.equal(await page.locator('.gallery-controls').evaluate(n => getComputedStyle(n).visibility), 'visible');
         assert.equal(await image.isVisible(), false);
-        assert.match(await status.textContent(), /失败/);
+        assert.match(await status.textContent(), /failed.*retry/);
         await page.locator('#gallery-next').click();
         await page.locator('#gallery-next').click();
         await trigger.evaluate(n => n.click());
