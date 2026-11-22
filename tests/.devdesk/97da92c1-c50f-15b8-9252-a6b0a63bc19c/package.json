@@ -1,0 +1,6 @@
+{
+  "name": "devdesk-independent-frontend-tests",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {"jsdom": "26.1.0"}
+}

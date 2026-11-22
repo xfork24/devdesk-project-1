@@ -20,6 +20,18 @@
       outline: 3px solid #005fcc;
       outline-offset: 3px;
     }
+    [hidden] { display: none !important; }
+    body { margin: 0 auto; padding: 12px; max-width: 1080px; font-family: system-ui, sans-serif; color: #14202b; }
+    .tabs, .screenshot-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+    .tabs button, #screenshots-panel button { min-height: 44px; padding: 8px 16px; font: inherit; cursor: pointer; }
+    .tabs [aria-selected="true"] { background: #14202b; color: white; }
+    button:focus-visible { outline: 3px solid #005fcc; outline-offset: 3px; }
+    #screenshots-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 20px; }
+    .screenshot { margin: 0; border: 1px solid #c8d2db; padding: 12px; border-radius: 8px; }
+    #screenshots-panel .screenshot-image { display: block; width: 100%; height: 220px; padding: 0; background: #14202b; cursor: zoom-in; }
+    .screenshot-image img { width: 100%; height: 100%; object-fit: contain; }
+    #screenshots-panel .screenshot-image[aria-expanded="true"] { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 1000; background: #080d12; cursor: zoom-out; }
+    .screenshot:has([aria-expanded="true"]) .screenshot-delete { position: fixed; bottom: 16px; right: 16px; z-index: 1001; }
     #gallery { width: min(100%, 720px); margin: 24px 0; }
     .gallery-slot { height: 360px; }
     #gallery-trigger { display: block; box-sizing: border-box; width: 100%; height: 360px; padding: 0; border: 0; background: #14202b; cursor: zoom-in; }
@@ -38,6 +50,11 @@
     <button id="language-toggle" type="button" title="切换到英文" lang="en">English</button>
   </div>
   <main>
+    <nav class="tabs" role="tablist" aria-label="页面">
+      <button id="welcome-tab" type="button" role="tab" aria-controls="welcome-panel" aria-selected="true">欢迎</button>
+      <button id="screenshots-tab" type="button" role="tab" aria-controls="screenshots-panel" aria-selected="false" tabindex="-1">截图</button>
+    </nav>
+    <div id="welcome-panel" role="tabpanel" aria-labelledby="welcome-tab">
     <h1>欢迎来到这里</h1>
     <section id="gallery" aria-label="自然风景图片窗">
       <div class="gallery-slot">
@@ -52,6 +69,19 @@
       <p id="gallery-status" role="status" aria-live="polite">正在加载图片…</p>
       <p><span id="gallery-credit">图片来自 </span><a href="https://www.pexels.com/zh-cn/">Pexels</a><span id="gallery-help"> · 点击图片放大或还原</span></p>
     </section>
+    </div>
+    <section id="screenshots-panel" role="tabpanel" aria-labelledby="screenshots-tab" hidden>
+      <h2 id="screenshots-heading">截图历史</h2>
+      <p id="screenshots-help">在本机 Mac 启动后台后，点击截图并拖动选择桌面区域。</p>
+      <div class="screenshot-actions">
+        <button id="capture-screenshot" type="button">区域截图</button>
+        <button id="reload-screenshots" type="button">刷新历史</button>
+      </div>
+      <p id="capture-status" role="status" aria-live="polite"></p>
+      <p id="history-status" role="status" aria-live="polite"></p>
+      <button id="retry-history" type="button" hidden>重试</button>
+      <div id="screenshots-list"></div>
+    </section>
   </main>
   <script>
     (() => {
@@ -59,6 +89,8 @@
       if (!button) return;
 
       let language = 'zh';
+      // Shared state lets other tabs translate asynchronous results without rebinding this button.
+      const app = window.welcomeTabs = {get language() { return language; }};
       const messages = {
         zh: {
           welcome: '欢迎来到这里', gallery: '自然风景图片窗', prev: '上一张', next: '下一张',
@@ -89,6 +121,7 @@
         button.textContent = language === 'zh' ? 'English' : '中文';
         button.setAttribute('lang', language === 'zh' ? 'en' : 'zh');
         renderGalleryText();
+        if (app.renderLanguage) app.renderLanguage();
       }
       renderLanguage(language);
       button.addEventListener('click', () => renderLanguage(language === 'zh' ? 'en' : 'zh'));
@@ -198,6 +231,7 @@
           window.scrollTo(savedScroll);
         }
       }
+      app.closeGallery = () => setExpanded(false);
       prev.addEventListener('click', () => step(-1));
       next.addEventListener('click', () => step(1));
       trigger.addEventListener('click', () => setExpanded(!expanded));
@@ -208,5 +242,6 @@
       show();
     })();
   </script>
+  <script src="/public/screenshots.js"></script>
 </body>
 </html>
