@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const os = require('node:os');
+const http = require('node:http');
 const {randomUUID} = require('node:crypto');
 const {createScreenshotServer} = require('../../../server.cjs');
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4z8DwHwAFAAH/iZk9HQAAAABJRU5ErkJggg==', 'base64');
@@ -29,6 +30,19 @@ async function fixture(t, options = {}) {
     assert.equal(page.status, 200); await page.arrayBuffer();
     const cookie = page.headers.getSetCookie().map(s => s.split(';')[0]).join('; ');
     async function req(method, route, body, headers = {}) {
+      // Native fetch rewrites Host; use the HTTP transport for explicit Host probes.
+      if (Object.keys(headers).some(key => key.toLowerCase() === 'host')) {
+        return new Promise((resolve, reject) => {
+          const request = http.request(base + route, {method, headers:{Origin:base, 'Content-Type':'application/json', 'X-CSRF-Token':app.csrfToken, Cookie:cookie, ...headers}, signal:AbortSignal.timeout(2500)}, response => {
+            const chunks = [];
+            response.on('data', chunk => chunks.push(chunk));
+            response.on('error', reject);
+            response.on('end', () => resolve(new Response(Buffer.concat(chunks), {status:response.statusCode, headers:response.headers})));
+          });
+          request.on('error', reject);
+          request.end(body === undefined ? undefined : JSON.stringify(body));
+        });
+      }
       return fetch(base + route, {method, headers:{Origin:base, 'Content-Type':'application/json', 'X-CSRF-Token':app.csrfToken, Cookie:cookie, ...headers}, body:body === undefined ? undefined : JSON.stringify(body), signal:AbortSignal.timeout(2500)});
     }
     async function save(requestId = randomUUID()) {const r = await req('POST','/api/screenshots',{requestId}); assert.equal(r.status,201); return (await r.json()).item;}
