@@ -25,15 +25,10 @@ function check(nodes, english) {
   const button = nodes.get('language-toggle');
   assert.ok(button, '语言按钮必须存在');
   assert.equal(button.attrs.title, english ? 'Switch to Chinese (Simplified)' : '切换到英文');
-  assert.equal(button.attrs['aria-describedby'], 'language-hint', '按钮必须精确关联语言提示');
-  const hint = nodes.get('language-hint');
-  assert.ok(hint, '语言提示目标必须存在');
-  assert.equal(nodes.allNodes.filter(node => node.attrs.id === 'language-hint').length, 1,
-    '全部元素中的语言提示 ID 必须唯一');
-  assert.strictEqual(nodes.get(button.attrs['aria-describedby']), hint, '关联必须指向现有提示');
+  assert.equal(button.attrs['aria-describedby'], undefined);
+  assert.equal(nodes.has('welcome-message'), false);
+  assert.equal(nodes.has('language-hint'), false);
   for (const [id, text, lang] of [
-    ['language-hint', english ? 'Language switching supports keyboard controls' : '语言切换支持键盘操作', english ? 'en' : 'zh'],
-    ['welcome-message', english ? 'Welcome' : '欢迎', english ? 'en' : 'zh'],
     ['language-toggle', english ? '中文' : 'English', english ? 'zh' : 'en']]) {
     assert.equal(nodes.get(id).textContent, text);
     assert.equal(nodes.get(id).attrs.lang, lang);
@@ -45,18 +40,15 @@ function click(nodes) {
   assert.equal(listeners[0].type, 'click');
   listeners[0].fn();
 }
-test('提示静态默认中文，位于欢迎段落之后且唯一', () => {
-  assert.equal([...html.matchAll(/id="language-hint"/g)].length, 1);
-  assert.match(html, /id="welcome-message"[^>]*>欢迎<\/p>\s*<p id="language-hint" lang="zh">语言切换支持键盘操作<\/p>/);
+test('静态与初始化均删除描述及占位', () => {
+  assert.doesNotMatch(html, /id="(?:welcome-message|language-hint)"/);
   check(open(), false);
 });
-test('提示及既有内容连续双向切换，复用原节点', () => {
+test('删除描述后连续双向切换，复用按钮', () => {
   const nodes = open();
-  const hint = nodes.get('language-hint');
   for (let i = 1; i <= 24; i++) {
     click(nodes);
     check(nodes, i % 2 === 1);
-    assert.strictEqual(nodes.get('language-hint'), hint);
   }
 });
 test('英文与切回中文后全新装载均恢复默认中文', () => {
@@ -66,10 +58,10 @@ test('英文与切回中文后全新装载均恢复默认中文', () => {
     check(nodes, count === 1);
     const reloaded = open();
     check(reloaded, false);
-    assert.notStrictEqual(reloaded.get('language-hint'), nodes.get('language-hint'));
+    assert.notStrictEqual(reloaded.get('language-toggle'), nodes.get('language-toggle'));
   }
 });
-test('脚本执行前静态关联有效且默认中文', () => {
+test('脚本执行前无悬空关联且默认中文', () => {
   check(open(false), false);
 });
 
