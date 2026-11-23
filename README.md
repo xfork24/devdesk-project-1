@@ -125,3 +125,7 @@ node test/browser-acceptance.cjs
 
 
 本次整页语言切换的浏览器验收通过 320×720、1280×720 两种视口，覆盖整页文字、鼠标与键盘、连续往返、刷新、展开状态下切换及失败恢复。结果和截图见 [本 Task 验收结果](evidence/.devdesk/140e9e7b-5742-f990-1d4f-1bedd673a8e0/browser-final/result.json)，同目录保存原生命令观测。使用可控 SVG 图片，未核验真实 CDN 可用性；未请求历史页面布局比较。
+
+图片键盘导航：焦点在欢迎图片上时，左右箭头按顺序切换，首尾停止；截图图片支持按当前网格四向移动，缺位停止。放大状态下仍可导航，Escape 还原当前图片并恢复原滚动位置。其他控件保留原有方向键行为。
+
+正式导航测试运行 `node --test test/gallery.test.cjs test/screenshots-ui.test.cjs`；后者使用上述私有 jsdom 配置。维护的 `test/browser-acceptance.cjs` 同时验证 320/1280 视口、五张截图的不完整末行、调整视口后的导航、真实焦点及展开槽位稳定。本 Task 的 `BROWSER_OUTPUT` 设为 `evidence/.devdesk/e14cc71d-4ada-ae1f-d3cc-2e4f96abb65d/browser-final`。独立工作流断言由平台维护。

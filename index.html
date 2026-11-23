@@ -208,6 +208,13 @@
         };
         pending.src = photo.src;
       }
+      function navigatePhoto(delta) {
+        const target = index + delta;
+        if (target < 0 || target >= photos.length) return false;
+        index = target;
+        show();
+        return true;
+      }
       function step(delta) {
         if (expanded) return;
         index = (index + delta + photos.length) % photos.length;
@@ -236,6 +243,10 @@
       next.addEventListener('click', () => step(1));
       trigger.addEventListener('click', () => setExpanded(!expanded));
       trigger.addEventListener('keydown', event => {
+        if (document.activeElement === trigger && ['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+          event.preventDefault();
+          navigatePhoto(event.key === 'ArrowLeft' ? -1 : 1);
+        }
         if (event.key === 'Escape') setExpanded(false);
         if (expanded && event.key === 'Tab') { event.preventDefault(); trigger.focus(); }
       });

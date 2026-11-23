@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "startedAt": "2026-11-23T03:29:54.951Z",
+  "finishedAt": "2026-11-23T03:30:12.045Z",
+  "timedOut": false,
+  "signal": null,
+  "imageFiles": null,
+  "source": {
+    "path": "/work/index.html",
+    "url": "http://127.0.0.1:40373/",
+    "sha256": "a703e12fa1ddab2d4d633d4dc31c55cfa7744fbde044a5653a6193ec54523418"
+  },
+  "baseline": null,
+  "browser": "145.0.7632.0",
+  "playwright": "1.58.2",
+  "applicationFiles": [
+    {
+      "path": "/work/server.cjs",
+      "url": "file:///work/server.cjs",
+      "sha256": "5bbc9321e1765792671c607c37dee96ac81ca3df37a42cfafa932307164500f0"
+    },
+    {
+      "path": "/work/backend/capture.cjs",
+      "url": "file:///work/backend/capture.cjs",
+      "sha256": "6ca0721060a89b256b4c8bc3d16bb5773ba8be616043c9dfc6e6e10b2c3de20d"
+    },
+    {
+      "path": "/work/backend/store.cjs",
+      "url": "file:///work/backend/store.cjs",
+      "sha256": "29ea085d116a0bdb4fe2ef49cccf0eda93d0cc0a31d6a4bfa20d92b6cc8c16c1"
+    },
+    {
+      "path": "/work/public/screenshots.js",
+      "url": "file:///work/public/screenshots.js",
+      "sha256": "97adc1eb93e2554d14da6bf67eb0bbfa34f8aca9ef16c053fbd69cd1c0a8fa90"
+    }
+  ],
+  "entrySha256": "d7626ce2e3f5f920ab2c529d13dee0765f5ff2b427018546b6ef525891127609",
+  "node": "v24.13.0",
+  "records": [
+    {
+      "renderedFonts": [
+        {
+          "familyName": "Noto Sans CJK JP",
+          "postScriptName": "NotoSansCJKjp-Bold",
+          "isCustomFont": false,
+          "glyphCount": 6
+        }
+      ],
+      "screenshots": {
+        "http": true,
+        "captureFixture": true,
+        "asyncLanguage": true,
+        "keyboardZoom": true,
+        "reload": true,
+        "delete": true
+      },
+      "imageMode": "controlled SVG fixtures; CDN not verified",
+      "width": 320,
+      "height": 720,
+      "mouse": true,
+      "tab": true,
+      "enter": true,
+      "space": true,
+      "staticTitle": true,
+      "title": true,
+      "roundTrips": 24,
+      "repeatedToggles": 24,
+      "refreshFromEnglish": true,
+      "refreshFromChinese": true,
+      "noDanglingDescription": true,
+      "removedDescriptions": true,
+      "reusedButton": true,
+      "visibleFocus": true,
+      "gallery": {
+        "photos": 5,
+        "cycles": true,
+        "repeatedRestore": true,
+        "ratio": true,
+        "failureRecovery": true,
+        "expandedFailureRecovery": true,
+        "staleExpandedCallbacks": true,
+        "rapidSwitch": true,
+        "keyboard": true,
+        "imageRequests": [
+          "417074",
+          "417074",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "417074",
+          "1261728",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "1366919",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "1366919",
+          "417074",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "417074",
+          "417074",
+          "417074"
+        ]
+      },
+      "baselineComparison": "not_requested"
+    },
+    {
+      "renderedFonts": [
+        {
+          "familyName": "Noto Sans CJK JP",
+          "postScriptName": "NotoSansCJKjp-Bold",
+          "isCustomFont": false,
+          "glyphCount": 6
+        }
+      ],
+      "screenshots": {
+        "http": true,
+        "captureFixture": true,
+        "asyncLanguage": true,
+        "keyboardZoom": true,
+        "reload": true,
+        "delete": true
+      },
+      "imageMode": "controlled SVG fixtures; CDN not verified",
+      "width": 1280,
+      "height": 720,
+      "mouse": true,
+      "tab": true,
+      "enter": true,
+      "space": true,
+      "staticTitle": true,
+      "title": true,
+      "roundTrips": 24,
+      "repeatedToggles": 24,
+      "refreshFromEnglish": true,
+      "refreshFromChinese": true,
+      "noDanglingDescription": true,
+      "removedDescriptions": true,
+      "reusedButton": true,
+      "visibleFocus": true,
+      "gallery": {
+        "photos": 5,
+        "cycles": true,
+        "repeatedRestore": true,
+        "ratio": true,
+        "failureRecovery": true,
+        "expandedFailureRecovery": true,
+        "staleExpandedCallbacks": true,
+        "rapidSwitch": true,
+        "keyboard": true,
+        "imageRequests": [
+          "417074",
+          "417074",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "417074",
+          "1261728",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "1366919",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "1366919",
+          "417074",
+          "417074",
+          "15286",
+          "691668",
+          "1366919",
+          "1261728",
+          "417074",
+          "417074",
+          "417074"
+        ]
+      },
+      "baselineComparison": "not_requested"
+    }
+  ],
+  "error": null
+}
