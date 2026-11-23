@@ -62,3 +62,22 @@ test('加载中展开后当前失败恢复原状态，过期事件不能关闭�
   p.pending.at(-1).onload();
   assert.equal(p.get('gallery-image').hidden, false);
 });
+
+for (const zoom of [false, true]) test(`focused arrow navigation preserves zoom=${zoom} and stops at edges`, () => {
+  const p = open(), b = p.get('gallery-trigger'), image = p.get('gallery-image');
+  const keys = key => {
+    let consumed = false;
+    for (const e of b.listeners) if (e.type === 'keydown') e.fn({key, preventDefault() { consumed = true; }});
+    return consumed;
+  };
+  const sources = [];
+  for (let i = 0; i < 5; i++) { sources.push(image.src); p.get('gallery-next').click(); }
+  b.focus(); if (zoom) b.click();
+  assert.equal(keys('ArrowLeft'), true); assert.equal(image.src, sources[0]);
+  for (let i = 1; i < 5; i++) { keys('ArrowRight'); assert.equal(image.src, sources[i]); }
+  keys('ArrowRight'); assert.equal(image.src, sources[4]);
+  keys('ArrowLeft'); keys('ArrowLeft'); assert.equal(image.src, sources[2]);
+  assert.equal(b.attrs['aria-expanded'], String(zoom)); assert.equal(p.document.activeElement, b);
+  p.get('language-toggle').focus(); assert.equal(keys('ArrowLeft'), false); assert.equal(image.src, sources[2]);
+  b.focus(); assert.equal(keys('ArrowUp'), false); keys('ArrowLeft'); assert.equal(image.src, sources[1]);
+});

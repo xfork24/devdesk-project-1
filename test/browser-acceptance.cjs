@@ -198,6 +198,20 @@ async function worker() {
         assert.equal(await image.getAttribute('src'), sequence[4]);
         await page.evaluate(() => { for (let i = 0; i < 12; i++) document.getElementById('gallery-next').click(); });
         await ready(); assert.equal(await image.getAttribute('src'), sequence[1]);
+        await page.reload(); await ready();
+        for (const zoom of [false, true]) {
+          await trigger.focus(); if (zoom) await trigger.press('Enter');
+          await trigger.press('ArrowLeft'); assert.equal(await image.getAttribute('src'), sequence[0]);
+          for (let i = 1; i < 5; i++) { await trigger.press('ArrowRight'); await ready(); assert.equal(await image.getAttribute('src'), sequence[i]); }
+          await trigger.press('ArrowRight'); assert.equal(await image.getAttribute('src'), sequence[4]);
+          await trigger.press('ArrowLeft'); await ready(); assert.equal(await image.getAttribute('src'), sequence[3]);
+          assert.equal(await trigger.evaluate(n => n === document.activeElement), true);
+          assert.equal(await trigger.getAttribute('aria-expanded'), String(zoom));
+          await page.locator('#language-toggle').focus(); await page.keyboard.press('ArrowLeft');
+          assert.equal(await image.getAttribute('src'), sequence[3]);
+          await trigger.focus(); if (zoom) await trigger.press('Escape');
+          await page.reload(); await ready();
+        }
         // Disable browser cache through routing, then force a new request to fail.
         failImages = true;
         await page.reload(); await remember();
@@ -271,6 +285,36 @@ async function worker() {
         await page.waitForFunction(n => document.querySelectorAll('#screenshots-list img').length === n, initial + 1);
         await page.locator('.screenshot-delete').first().click();
         await page.waitForFunction(n => document.querySelectorAll('#screenshots-list img').length === n, initial);
+        // Seed five actual captures, giving a partial final row at wide viewports.
+        for (let i = await cards.count(); i < 5; i++) {
+          await page.locator('#capture-screenshot').click();
+          await page.waitForFunction(() => !document.getElementById('capture-screenshot').disabled);
+        }
+        const buttons = page.locator('.screenshot-image');
+        const geometry = () => page.locator('.screenshot').evaluateAll(ns => ns.map(n => { const r=n.getBoundingClientRect(); return {top:r.top+scrollY,left:r.left,width:r.width,height:r.height}; }));
+        for (const viewport of [width, width === 320 ? 1280 : 320]) {
+          await page.setViewportSize({width:viewport,height:720});
+          for (const zoom of [false,true]) {
+            await buttons.nth(0).focus();
+            const slots = await geometry();
+            if(zoom) await buttons.nth(0).press('Enter');
+            assert.deepEqual(await geometry(), slots, 'expanded slot remains stable');
+            let current=0;
+            for (const key of ['ArrowRight','ArrowDown','ArrowLeft','ArrowUp','ArrowDown','ArrowDown','ArrowRight','ArrowRight','ArrowDown']) {
+              const g=await geometry();
+              const rows=[];
+              for(let i=0;i<g.length;i++) { let row=rows.find(r=>Math.abs(g[r[0]].top-g[i].top)<1); if(!row)rows.push(row=[]); row.push(i); }
+              const r=rows.findIndex(row=>row.includes(current)), c=rows[r].indexOf(current);
+              const target= key==='ArrowRight'?rows[r][c+1]:key==='ArrowLeft'?rows[r][c-1]:key==='ArrowUp'?rows[r-1]?.[c]:rows[r+1]?.[c];
+              await buttons.nth(current).press(key); current=target??current;
+              assert.equal(await buttons.nth(current).evaluate(n=>n===document.activeElement),true);
+              assert.equal(await buttons.nth(current).getAttribute('aria-expanded'),String(zoom));
+              assert.deepEqual(await geometry(),slots);
+            }
+            if(zoom) { await buttons.nth(current).press('Escape'); assert.equal(await buttons.nth(current).evaluate(n=>n===document.activeElement),true); }
+          }
+        }
+        await page.setViewportSize({width,height:720});
         records.push({renderedFonts, screenshots: {http: true, captureFixture: true, asyncLanguage: true, keyboardZoom: true, reload: true, delete: true}, imageMode: imageDirectory ? 'cached Pexels JPEGs' : 'controlled SVG fixtures; CDN not verified', width, height: 720, mouse: true, tab: true, enter: true, space: true,
           staticTitle: true, title: true, roundTrips: 24, repeatedToggles: 24, refreshFromEnglish: true, refreshFromChinese: true,
           noDanglingDescription: true, removedDescriptions: true, reusedButton: true, visibleFocus: true, gallery: {photos: 5, cycles: true, repeatedRestore: true, ratio: true, failureRecovery: true, expandedFailureRecovery: true, staleExpandedCallbacks: true, rapidSwitch: true, keyboard: true, imageRequests},
