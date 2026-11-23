@@ -78,11 +78,54 @@
         item.url !== '/api/screenshots/' + item.id + '/image') throw new Error('STORAGE_FAILED');
     return item;
   }
+  // Keep the image's grid slot while its button is fixed to the viewport.
+  function setCardExpanded(card, value) {
+    if (value) {
+      const height = card.root.getBoundingClientRect().height;
+      card.root.style.boxSizing = 'border-box';
+      card.root.style.minHeight = height + 'px';
+    } else { card.root.style.minHeight = ''; card.root.style.boxSizing = ''; }
+    card.imageButton.setAttribute('aria-expanded', String(value));
+    card.imageButton.setAttribute('aria-label', t(value ? 'restore' : 'expand'));
+  }
+  function findNeighbor(id, key) {
+    const positions = [...cards].filter(([, card]) => card.root.isConnected)
+      .map(([id, card]) => ({id, rect: card.root.getBoundingClientRect()}))
+      .filter(({rect}) => rect.width > 0 && rect.height > 0 && Number.isFinite(rect.top) && Number.isFinite(rect.left))
+      .sort((a, b) => a.rect.top - b.rect.top || a.rect.left - b.rect.left);
+    const rows = [];
+    for (const entry of positions) {
+      let row = rows.find(row => Math.abs(row[0].rect.top - entry.rect.top) < 1);
+      if (!row) rows.push(row = []);
+      row.push(entry);
+    }
+    for (const row of rows) row.sort((a, b) => a.rect.left - b.rect.left);
+    const r = rows.findIndex(row => row.some(entry => entry.id === id));
+    if (r < 0) return null;
+    const c = rows[r].findIndex(entry => entry.id === id);
+    const target = key === 'ArrowLeft' ? rows[r][c - 1] : key === 'ArrowRight' ? rows[r][c + 1] :
+      key === 'ArrowUp' ? rows[r - 1]?.[c] : key === 'ArrowDown' ? rows[r + 1]?.[c] : null;
+    return target?.id || null;
+  }
+  function navigateScreenshot(id, key) {
+    const targetId = findNeighbor(id, key);
+    if (!targetId) return false;
+    const target = cards.get(targetId);
+    if (expandedId) {
+      const previous = cards.get(expandedId);
+      setCardExpanded(target, true);
+      if (previous) setCardExpanded(previous, false);
+      expandedId = targetId;
+      if ([...cards.values()].some(card => card.imageButton === restoreView.focus)) restoreView.focus = target.imageButton;
+    }
+    target.imageButton.focus({preventScroll: true});
+    return true;
+  }
   function closeExpanded(restoreFocus = true) {
     if (!expandedId) return;
     const card = cards.get(expandedId);
     expandedId = null;
-    if (card) { card.imageButton.setAttribute('aria-expanded', 'false'); card.imageButton.setAttribute('aria-label', t('expand')); }
+    if (card) setCardExpanded(card, false);
     document.body.style.overflow = restoreView.overflow;
     const focus = restoreView.focus;
     if (restoreFocus && focus?.isConnected) focus.focus({preventScroll: true});
@@ -96,8 +139,7 @@
     restoreView = {overflow: document.body.style.overflow, x: window.scrollX, y: window.scrollY, focus: document.activeElement};
     expandedId = id;
     document.body.style.overflow = 'hidden';
-    const button = cards.get(id).imageButton;
-    button.setAttribute('aria-expanded', 'true'); button.setAttribute('aria-label', t('restore'));
+    setCardExpanded(cards.get(id), true);
   }
   function render() {
     $('welcome-tab').textContent = t('welcome'); $('screenshots-tab').textContent = t('screenshots');
@@ -127,7 +169,13 @@
         imageButton.type = remove.type = 'button'; imageButton.setAttribute('aria-expanded', 'false');
         imageButton.append(image); root.append(imageButton, caption, remove);
         imageButton.addEventListener('click', () => toggleExpanded(item.id));
-        imageButton.addEventListener('keydown', event => { if (event.key === 'Escape') closeExpanded(); });
+        imageButton.addEventListener('keydown', event => {
+          if (document.activeElement === imageButton && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)) {
+            event.preventDefault();
+            navigateScreenshot(item.id, event.key);
+          }
+          if (event.key === 'Escape') closeExpanded();
+        });
         remove.addEventListener('click', () => deleteItem(item.id));
         card = {root, imageButton, image, caption, remove}; cards.set(item.id, card);
       }

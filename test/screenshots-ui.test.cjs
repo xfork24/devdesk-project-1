@@ -86,3 +86,36 @@ test('each error is localized, network failures do not retry, malformed success 
   p.state.post=()=>response(null);p.click('capture-screenshot');await settle(()=>!p.$('capture-screenshot').disabled);
   assert.equal(p.images().length,1);assert.doesNotMatch(p.$('capture-status').textContent,/undefined/);assert.deepEqual(p.errors,[]);
 });
+
+for (const zoom of [false,true]) test(`layout arrow navigation, boundaries and focus recovery zoom=${zoom}`, async t => {
+  const data = Array.from({length:5}, (_,i) => { const id = String(i+1).repeat(8)+'-1111-4111-8111-111111111111'; return {...A,id,createdAt:`2026-11-${20-i}T01:00:00.000Z`,url:`/api/screenshots/${id}/image`}; });
+  const p = open(t,data); await settle(()=>p.images().length===5);
+  const roots = [...p.$('screenshots-list').children], bs = roots.map(r=>r.querySelector('button'));
+  const layout = columns => roots.forEach((r,i)=>r.getBoundingClientRect=()=>({left:i%columns*220,top:Math.floor(i/columns)*180,width:200,height:160}));
+  layout(3);
+  const key = (b,k) => { const e = new p.w.KeyboardEvent('keydown',{key:k,bubbles:true,cancelable:true}); b.dispatchEvent(e); return e.defaultPrevented; };
+  bs[0].focus(); p.w.scrollY=123; if(zoom)bs[0].click();
+  for(const [from,k,to] of [[0,'ArrowRight',1],[1,'ArrowDown',4],[4,'ArrowRight',4],[4,'ArrowLeft',3],[3,'ArrowUp',0]]) {
+    assert.equal(key(bs[from],k),true); assert.equal(p.d.activeElement,bs[to]);
+    assert.deepEqual(bs.map(b=>b.getAttribute('aria-expanded')),bs.map((_,i)=>String(zoom&&i===to)));
+  }
+  layout(2); key(bs[0],'ArrowDown'); assert.equal(p.d.activeElement,bs[2]);
+  p.$('capture-screenshot').focus(); assert.equal(key(bs[2],'ArrowRight'),false);
+  bs[2].focus(); key(bs[2],'ArrowDown'); assert.equal(p.d.activeElement,bs[4]);
+  if(zoom) { key(bs[4],'Escape'); assert.equal(p.d.activeElement,bs[4]); assert.equal(p.w.scrollY,123); assert.ok(roots.every(r=>r.style.minHeight==='')); }
+});
+
+for (const count of [0,1]) test(`arrow boundaries with ${count} screenshot`, async t => {
+  const p=open(t,count?[A]:[]); await settle(()=>!p.$('reload-screenshots').disabled);
+  const b=count?p.card(A.id).querySelector('button'):p.$('capture-screenshot');
+  if(count)p.card(A.id).getBoundingClientRect=()=>({top:0,left:0,width:200,height:160});
+  for(const zoom of count?[false,true]:[false]) {
+    b.focus();if(zoom)b.click();
+    for(const key of ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown']) {
+      const e=new p.w.KeyboardEvent('keydown',{key,bubbles:true,cancelable:true});b.dispatchEvent(e);
+      assert.equal(e.defaultPrevented,Boolean(count));assert.equal(p.d.activeElement,b);
+      if(count)assert.equal(b.getAttribute('aria-expanded'),String(zoom));
+    }
+    if(zoom)b.click();
+  }
+});
