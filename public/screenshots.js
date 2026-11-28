@@ -153,6 +153,7 @@
     $('capture-status').textContent = noticeError ? t('failure') + t(noticeError) : notice ? t(notice) : '';
     $('history-status').textContent = history === 'loading' ? t('loading') : history === 'error' ? t('historyError') + t(historyError) : items.size ? '' : emptyGuide();
     panel.setAttribute('aria-busy', String(loading));
+    $('history-status').setAttribute('aria-busy', String(loading));
     for (const [id, card] of cards) {
       card.image.alt = t('image') + ' · ' + items.get(id).createdAt;
       card.imageButton.setAttribute('aria-label', t(id === expandedId ? 'restore' : 'expand'));
