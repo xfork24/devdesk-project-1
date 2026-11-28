@@ -16,13 +16,15 @@ async function settle(check) {
   for (let i=0;i<100;i++) { if(check()) return; await new Promise(r=>setTimeout(r,5)); }
   assert.fail('UI did not reach expected state within 500ms');
 }
-function open(t, data=[A,B]) {
+function open(t, data=[A,B], overrides={}) {
   const dom = new JSDOM(fs.readFileSync(path.join(root,'index.html'),'utf8'),{url:'http://localhost/',runScripts:'outside-only',pretendToBeVisual:true});
   t.after(()=>dom.window.close());
   const w=dom.window, d=w.document, calls=[], errors=[];
   w.scrollTo = p => {w.scrollY=p.top; w.scrollX=p.left;};
   w.Image = class { set src(v) {queueMicrotask(()=>this.onload?.());} };
   const state = {list:()=>response({items:data}),post:()=>response({item:B},201),del:()=>response(null,204)};
+  // An optional list response is installed before the tab is entered, so a case can observe the first read while it is pending.
+  if (overrides.list) state.list = overrides.list;
   w.fetch = async (url, options={}) => {
     calls.push({url, ...options});
     if (url==='/api/session') return response({csrfToken:'formal-session'});
@@ -205,4 +207,68 @@ test('empty and non-empty history keep one identical history read',async t=>{
   assert.equal(reads(filled).length,1);
   assert.equal(reads(filled)[0].url,reads(empty)[0].url);
   assert.equal(reads(filled)[0].credentials,'same-origin');
+});
+
+// Assistive-technology busy marker on #history-status: "true" while a history
+// read is in flight and "false" once that read settles, whichever way it ends.
+test('the history status exposes aria-busy while a read is in flight and after it settles',async t=>{
+  const hold=deferred();
+  const p=open(t,[A,B],{list:()=>hold.promise});
+  assert.equal(p.$('history-status').getAttribute('aria-busy'),'true');
+  assert.equal(p.$('history-status').textContent,LOADING_ZH);
+  assert.equal(p.$('reload-screenshots').disabled,true);
+  assert.equal(reads(p).length,1);
+  hold.resolve(response({items:[A,B]}));
+  await settle(()=>!p.$('reload-screenshots').disabled);
+  assert.equal(p.$('history-status').getAttribute('aria-busy'),'false');
+  assert.equal(p.$('history-status').textContent,'');
+  assert.equal(p.images().length,2);
+  p.state.list=()=>response({items:[]});
+  p.click('reload-screenshots');
+  await settle(()=>!p.$('reload-screenshots').disabled);
+  assert.equal(p.$('history-status').getAttribute('aria-busy'),'false');
+  assert.equal(p.$('history-status').textContent,GUIDE_ZH);
+  p.state.list=()=>response({error:{code:'STORAGE_FAILED'}},500);
+  p.click('reload-screenshots');
+  await settle(()=>!p.$('retry-history').hidden);
+  assert.equal(p.$('history-status').getAttribute('aria-busy'),'false');
+  assert.equal(p.$('history-status').textContent,ERROR_ZH);
+  assert.equal(p.$('retry-history').hidden,false);
+  assert.equal(p.$('retry-history').disabled,false);
+  assert.deepEqual(p.errors,[]);
+});
+
+// The busy marker survives a language switch and repeated triggers: one read
+// stays in flight, the marker stays "true", and it settles to "false".
+test('the busy marker survives a language switch and repeated triggers with a single read',async t=>{
+  const p=await openEmpty(t);
+  p.state.list=()=>response({error:{code:'STORAGE_FAILED'}},500);
+  p.click('reload-screenshots');
+  await settle(()=>!p.$('retry-history').hidden);
+  const before=reads(p).length;
+  const hold=deferred();
+  p.state.list=()=>hold.promise;
+  p.click('retry-history');
+  assert.equal(reads(p).length,before+1);
+  assert.equal(p.$('history-status').getAttribute('aria-busy'),'true');
+  assert.equal(p.$('history-status').textContent,LOADING_ZH);
+  assert.equal(p.$('reload-screenshots').disabled,true);
+  assert.equal(p.$('retry-history').disabled,true);
+  p.click('language-toggle');
+  assert.equal(p.$('history-status').getAttribute('aria-busy'),'true');
+  assert.equal(p.$('history-status').textContent,'Loading history…');
+  assert.equal(reads(p).length,before+1);
+  p.click('reload-screenshots');
+  p.click('retry-history');
+  p.$('reload-screenshots').dispatchEvent(new p.w.MouseEvent('click',{bubbles:true,cancelable:true}));
+  p.$('retry-history').dispatchEvent(new p.w.MouseEvent('click',{bubbles:true,cancelable:true}));
+  p.click('language-toggle');
+  assert.equal(reads(p).length,before+1);
+  assert.equal(p.$('history-status').getAttribute('aria-busy'),'true');
+  assert.equal(p.$('history-status').textContent,LOADING_ZH);
+  hold.resolve(response({items:[]}));
+  await settle(()=>!p.$('reload-screenshots').disabled);
+  assert.equal(p.$('history-status').getAttribute('aria-busy'),'false');
+  assert.equal(p.$('history-status').textContent,GUIDE_ZH);
+  assert.deepEqual(p.errors,[]);
 });
