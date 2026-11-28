@@ -10,7 +10,7 @@
     zh: {
       welcome: '欢迎', screenshots: '截图', pages: '页面', heading: '截图历史',
       help: '在本机 Mac 启动后台后，点击截图并拖动选择桌面区域。权限问题请为启动后台的宿主应用检查“隐私与安全性 → 屏幕与系统音频录制”，授权后按系统要求重启后台再重试。',
-      capture: '区域截图', reload: '刷新历史', retry: '重试', loading: '正在加载历史…', empty: '暂无截图',
+      capture: '区域截图', reload: '刷新历史', retry: '重试', loading: '正在加载历史…', empty: '暂无截图。点击“{capture}”创建第一张截图。',
       capturing: '正在截图并保存，请选择桌面区域…', saved: '截图已保存', cancelled: '截图已取消',
       deleted: '截图已删除', remove: '删除截图', expand: '放大截图，再次点击还原', restore: '还原截图', image: '截图',
       historyError: '历史加载失败：', failure: '操作失败：',
@@ -22,7 +22,7 @@
     en: {
       welcome: 'Welcome', screenshots: 'Screenshots', pages: 'Pages', heading: 'Screenshot history',
       help: 'Start the backend on this Mac, then capture and drag to select a desktop region. For permission issues, check Privacy & Security → Screen & System Audio Recording for the app hosting the backend. Grant access and restart the backend if required, then retry.',
-      capture: 'Capture region', reload: 'Refresh history', retry: 'Retry', loading: 'Loading history…', empty: 'No screenshots yet',
+      capture: 'Capture region', reload: 'Refresh history', retry: 'Retry', loading: 'Loading history…', empty: 'No screenshots yet. Select “{capture}” to create your first screenshot.',
       capturing: 'Capturing and saving; select a desktop region…', saved: 'Screenshot saved', cancelled: 'Capture cancelled',
       deleted: 'Screenshot deleted', remove: 'Delete screenshot', expand: 'Enlarge screenshot; click again to restore', restore: 'Restore screenshot', image: 'Screenshot',
       historyError: 'History loading failed: ', failure: 'Operation failed: ',
@@ -33,6 +33,8 @@
     }
   };
   const t = key => messages[app.language][key] || messages[app.language].CAPTURE_FAILED;
+  // The empty-state guide names the capture button, so its label cannot drift from the call to action.
+  const emptyGuide = () => t('empty').replace('{capture}', () => t('capture'));
   const errorCode = error => Object.hasOwn(messages.en, error?.message) ? error.message : 'CAPTURE_FAILED';
   let items = new Map(), history = 'idle', historyError = '', notice = '', noticeError = '';
   let capturing = false, loading = false, expandedId = null, restoreView = null;
@@ -149,7 +151,7 @@
     reloadButton.textContent = t('reload'); reloadButton.disabled = loading;
     retry.textContent = t('retry'); retry.hidden = history !== 'error'; retry.disabled = loading;
     $('capture-status').textContent = noticeError ? t('failure') + t(noticeError) : notice ? t(notice) : '';
-    $('history-status').textContent = history === 'loading' ? t('loading') : history === 'error' ? t('historyError') + t(historyError) : items.size ? '' : t('empty');
+    $('history-status').textContent = history === 'loading' ? t('loading') : history === 'error' ? t('historyError') + t(historyError) : items.size ? '' : emptyGuide();
     panel.setAttribute('aria-busy', String(loading));
     for (const [id, card] of cards) {
       card.image.alt = t('image') + ' · ' + items.get(id).createdAt;

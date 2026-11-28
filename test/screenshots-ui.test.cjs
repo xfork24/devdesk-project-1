@@ -119,3 +119,90 @@ for (const count of [0,1]) test(`arrow boundaries with ${count} screenshot`, asy
     if(zoom)b.click();
   }
 });
+
+// Empty-state guide: #history-status shows the full bilingual call to action,
+// while loading, error and non-empty history keep their existing text.
+const GUIDE_ZH='暂无截图。点击“区域截图”创建第一张截图。';
+const GUIDE_EN='No screenshots yet. Select “Capture region” to create your first screenshot.';
+const LOADING_ZH='正在加载历史…';
+const ERROR_ZH='历史加载失败：存储失败，请检查后台磁盘后重试。';
+const GUIDE_PATTERN=/暂无截图|No screenshots yet/;
+const reads=p=>p.calls.filter(c=>c.url==='/api/screenshots');
+// Completion is judged by the panel request ending, not by an empty list length.
+async function openEmpty(t){const p=open(t,[]);await settle(()=>!p.$('reload-screenshots').disabled);return p;}
+
+test('empty history shows the full Chinese guide as plain text',async t=>{
+  const p=await openEmpty(t);
+  assert.equal(p.$('history-status').textContent,GUIDE_ZH);
+  assert.equal(p.$('history-status').children.length,0);
+});
+test('the empty-history guide follows the language switch',async t=>{
+  const p=await openEmpty(t);
+  p.click('language-toggle');
+  assert.equal(p.$('history-status').textContent,GUIDE_EN);
+  assert.equal(p.$('history-status').children.length,0);
+});
+test('the empty-history guide round-trips between languages without extra history reads',async t=>{
+  const p=await openEmpty(t);
+  const before=reads(p).length;
+  for(const expected of [GUIDE_EN,GUIDE_ZH,GUIDE_EN,GUIDE_ZH]){p.click('language-toggle');assert.equal(p.$('history-status').textContent,expected);}
+  assert.equal(reads(p).length,before);
+});
+test('a pending history request keeps the loading text and hides both guides',async t=>{
+  const p=await openEmpty(t);
+  const hold=deferred();p.state.list=()=>hold.promise;p.click('reload-screenshots');
+  assert.equal(p.$('history-status').textContent,LOADING_ZH);
+  assert.doesNotMatch(p.$('screenshots-panel').textContent,GUIDE_PATTERN);
+  p.click('language-toggle');
+  assert.equal(p.$('history-status').textContent,'Loading history…');
+  assert.doesNotMatch(p.$('screenshots-panel').textContent,GUIDE_PATTERN);
+  hold.resolve(response({items:[]}));
+  await settle(()=>!p.$('reload-screenshots').disabled);
+  assert.equal(p.$('history-status').textContent,GUIDE_EN);
+});
+test('a failed history request keeps the error text, the retry control and no guide',async t=>{
+  const p=await openEmpty(t);
+  p.state.list=()=>response({error:{code:'STORAGE_FAILED'}},500);p.click('reload-screenshots');
+  await settle(()=>!p.$('retry-history').hidden);
+  assert.equal(p.$('history-status').textContent,ERROR_ZH);
+  assert.doesNotMatch(p.$('screenshots-panel').textContent,GUIDE_PATTERN);
+  p.click('language-toggle');
+  assert.equal(p.$('history-status').textContent,'History loading failed: Storage failed. Check the backend disk and retry.');
+  p.state.list=()=>response({items:[]});p.click('retry-history');
+  await settle(()=>!p.$('reload-screenshots').disabled);
+  assert.equal(p.$('history-status').textContent,GUIDE_EN);
+});
+test('a non-empty history renders the existing list and hides both guides',async t=>{
+  const p=open(t,[A]);await settle(()=>p.images().length===1);
+  assert.equal(p.$('history-status').textContent,'');
+  assert.doesNotMatch(p.$('screenshots-panel').textContent,GUIDE_PATTERN);
+});
+test('the guide adds no control and the existing capture flow is unchanged',async t=>{
+  const p=await openEmpty(t);
+  assert.deepEqual([...p.$('screenshots-panel').querySelectorAll('button')].map(b=>b.id).sort(),
+    ['capture-screenshot','reload-screenshots','retry-history']);
+  assert.equal(p.$('capture-screenshot').textContent,'区域截图');
+  assert.equal(p.$('history-status').children.length,0);
+  p.click('capture-screenshot');
+  await settle(()=>p.calls.some(c=>c.method==='POST'));
+  const writes=p.calls.filter(c=>c.method==='POST');
+  assert.equal(writes.length,1);
+  assert.equal(writes[0].url,'/api/screenshots');
+  assert.equal(writes[0].headers['X-CSRF-Token'],'formal-session');
+  assert.match(JSON.parse(writes[0].body).requestId,/^[0-9a-f-]{36}$/i);
+});
+test('empty and non-empty history keep one identical history read',async t=>{
+  const empty=await openEmpty(t);
+  assert.equal(reads(empty).length,1);
+  assert.equal(reads(empty)[0].method??'GET','GET');
+  assert.equal(reads(empty)[0].credentials,'same-origin');
+  const before=empty.calls.length;
+  empty.click('language-toggle');empty.click('language-toggle');
+  empty.click('welcome-tab');empty.click('screenshots-tab');
+  assert.equal(empty.calls.length,before);
+  assert.equal(reads(empty).length,1);
+  const filled=open(t,[A]);await settle(()=>filled.images().length===1);
+  assert.equal(reads(filled).length,1);
+  assert.equal(reads(filled)[0].url,reads(empty)[0].url);
+  assert.equal(reads(filled)[0].credentials,'same-origin');
+});
